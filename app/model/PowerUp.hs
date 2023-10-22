@@ -1,5 +1,7 @@
 module Model.PowerUp where
+
+  import Model.General (Position)
     
-data PowerUp = BurstFire {pos :: Position} 
-             | ConeFire {pos :: Position} 
-             | SpeedBoost {pos :: Position}      
+  data PowerUp = BurstFire {burstFirePos :: Position}
+               | ConeFire {coneFirePos :: Position}
+               | SpeedBoost {speedBoostPos :: Position}

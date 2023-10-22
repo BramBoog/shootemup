@@ -1,2 +1,4 @@
 module Model.General where
-  -- Position data type, vector data type
+  type Position = (Int, Int)
+  type Vector   = (Int, Int)
+  type Score    = Int

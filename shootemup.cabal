@@ -12,6 +12,7 @@ executable Game
                     Model.General,
                     Model.Player,
                     Model.Shooting
+                    Model.PowerUp
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

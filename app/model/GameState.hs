@@ -1,16 +1,22 @@
 module Model.GameState where
 
-data GameState = { 
-    isPaused :: Bool, 
-    player :: Player,  
+  import Model.Player
+  import Model.Enemy
+  import Model.Shooting (Bullet)
+  import Model.General (Score)
+  import Model.PowerUp
+
+  data GameState = GameState {
+    isPaused :: Bool,
+    player :: Player,
     enemies :: (
-        [BasicEnemy], 
-        [BurstEnemy], 
-        [ConeEnemy], 
-        [BasicPlayerSeekingEnemy], 
-        [FastPlayerSeekingEnemy] 
-    ), 
-    bullets :: [Bullets], 
-    score :: Score, 
-    powerUps :: [PowerUp] 
-} 
+      [BasicEnemy],
+      [BurstEnemy],
+      [ConeEnemy],
+      [BasicPlayerSeekingEnemy],
+      [FastPlayerSeekingEnemy]
+    ),
+    bullets :: [Bullet],
+    score :: Score,
+    powerUps :: [PowerUp]
+  }
