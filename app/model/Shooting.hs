@@ -4,6 +4,6 @@ module Model.Shooting where
 
   -- CanShoot type class, Bullet data type, Weapon data type
 
-  data Bullet = Bullet {pos :: Position, vector :: Vector}
+  data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector}
 
   data Weapon = Single | Burst | Cone
