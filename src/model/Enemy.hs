@@ -96,3 +96,5 @@ instance CanShoot BasicPlayerSeekingEnemy b where
         shoot b {basicSeekingPos} = [Bullet {basicSeekingPos, left}] -- One bullet
         
         
+
+  
