@@ -92,14 +92,14 @@ class MovePlayerSeeking a where
 
 instance MovePlayerSeeking BasicPlayerSeekingEnemy where
         moveSeeking b player = let (x, y) = pos b in
-                b {basicSeekingPos = (x - 1, y + seeking_speed * abs (y - playerPos player))} -- The vertical movement is based on the vertical distance between player and enemy.
+                b {basicSeekingPos = (x - 1, y + seeking_speed * (y - playerPos player))} -- The vertical movement is based on the vertical distance between player and enemy.
                 where seeking_speed = 1 -- How fast the enemy approaches the player vertically
                 
 
 instance MovePlayerSeeking FastPlayerSeekingEnemy where
         moveSeeking :: FastPlayerSeekingEnemy -> Player -> FastPlayerSeekingEnemy
         moveSeeking f player = let (x, y) = pos f in
-                f {fastSeekingPos = (x - 1, y + seeking_speed * abs (y - playerPos player))}
+                f {fastSeekingPos = (x - 1, y + seeking_speed * (y - playerPos player))}
                 where seeking_speed = 2
 
 
@@ -118,7 +118,7 @@ instance CanShoot BasicEnemy where
                 
 instance CanShoot BurstEnemy where
         shoot b = let (x, y) = pos b in
-                [Bullet {bulletPos = (x, y), bulletVector = left}, Bullet {bulletPos = (x + 1, y), bulletVector = left}, Bullet {bulletPos = (x + 1, y), bulletVector = left}] -- Three bullets in one horizontal line, two start a bit to the left of the enemy.
+                [Bullet {bulletPos = (x, y), bulletVector = left}, Bullet {bulletPos = (x + 1, y), bulletVector = left}, Bullet {bulletPos = (x + 2, y), bulletVector = left}] -- Three bullets in one horizontal line, two start a bit to the left of the enemy.
 
 instance CanShoot ConeEnemy where
         shoot c = [Bullet  {bulletPos = pos c, bulletVector = left}, Bullet  {bulletPos = pos c, bulletVector = upward}, Bullet  {bulletPos = pos c, bulletVector = downward}] -- Three bullets in three different directions
