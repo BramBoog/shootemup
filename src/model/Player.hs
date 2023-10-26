@@ -4,8 +4,8 @@ import Model.General (Position)
 import Model.Shooting (Weapon)
 
 data Player = Player {
-  playerPos :: Int, -- Only vertical position 
-  speed :: Int, 
+  playerPos :: Position,
+  speed :: Float, 
   weapon :: Weapon, 
   lives :: Int 
 }
