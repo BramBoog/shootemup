@@ -9,6 +9,7 @@ library
   exposed-modules:  Model.Enemy,
                     Model.GameState,
                     Model.General,
+                    Model.Parameters,
                     Model.Player,
                     Model.Shooting,
                     Model.PowerUp
