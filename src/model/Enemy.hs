@@ -7,11 +7,11 @@ import Model.Shooting (Bullet (Bullet, bulletPos, bulletVector))
 import Model.Player
 
 -- All five enemy data types, enemy type class.
-data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Int} 
-data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Int} 
-data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Int} 
-data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Int} 
-data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} 
+data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Int}
+data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Int}
+data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Int}
+data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Int}
+data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position}
 
 
 -- All enemies are instances of this class.
@@ -125,7 +125,21 @@ instance CanShoot ConeEnemy where
 
 instance CanShoot BasicPlayerSeekingEnemy where
         shoot b = [Bullet {bulletPos = pos b, bulletVector = left}] -- One bullet
+   
         
         
+-- Show is used to in a dictionary in View to return a picture for each renderable data type.
+instance Show BasicEnemy where
+        show basicEnemy = "BasicEnemy"
 
-  
+instance Show BurstEnemy where 
+        show burstEnemy = "BurstEnemy"  
+
+instance Show ConeEnemy where 
+        show coneEnemy = "ConeEnemy"   
+
+instance Show BasicPlayerSeekingEnemy where 
+        show basicPlayerSeekingEnemy = "BasicPlayerSeekingEnemy"   
+
+instance Show FastPlayerSeekingEnemy where 
+        show fastPlayerSeekingEnemy = "FastPlayerSeekingEnemy"  

@@ -9,3 +9,6 @@ data Player = Player {
   weapon :: Weapon, 
   lives :: Int 
 }
+
+instance Show Player where
+  show player = "Player"

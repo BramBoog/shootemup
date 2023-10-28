@@ -6,4 +6,7 @@ import Model.General
 
 data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector}
 
-data Weapon = Single | Burst | Cone
+data Weapon = Single | Burst | Cone deriving Show
+
+instance Show Bullet where
+    show bullet = "Bullet"

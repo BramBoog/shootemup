@@ -1,4 +1,7 @@
 module Main where
 
+import View.View
+import Graphics.Gloss
+
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = display window white picture
