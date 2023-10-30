@@ -18,7 +18,7 @@ assets = Map.fromList
 class Renderable a where
     -- Take an asset and use an - asset name to picture - mapping function to return a picture.
     render :: Map.Map String Picture -> a -> Picture
-    render assetNameToPicture = assetNameToPicture (show a)
+    render assetNameToPicture a = assetNameToPicture (show a)
 
 
 enemySize = 0.5
@@ -44,5 +44,5 @@ asssetNameToPicture = fromlist [("BasicEnemy", color red circleSolid enemySize),
 
 -- Return all the pictures of the entire gamestate.
 view :: Map.Map String Picture -> GameState -> Picture
-view assetNameToPicture GameState { player, enemies = (BasicEnemy, BurstEnemy, ConeEnemy, BasicPlayerSeekingEnemy, FastPlayerSeekingEnemy), bullets, powerups} = 
-    Pictures $ map (render assetNameToPicture) $ player : BasicEnemy ++ BurstEnemy ++ ConeEnemy ++ BasicPlayerSeekingEnemy ++ FastPlayerSeekingEnemy ++ bullets ++ powerups
+view assetNameToPicture GameState { player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} = 
+    Pictures $ map (render assetNameToPicture) $ player : basicEnemyList ++ burstEnemyList ++ coneEnemyList ++ basicPlayerSeekingEnemyList ++ fastPlayerSeekingEnemyList ++ bullets ++ powerUps
