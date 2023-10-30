@@ -12,13 +12,10 @@ window = InWindow "Text" (500, 500) (10, 10)
 picture :: Picture
 picture = circle 100
 
-assets = Map.fromList
 
--- Class of all renderable objects
-class Renderable a where
-    -- Take an asset and use an - asset name to picture - mapping function to return a picture.
-    render :: Map.Map String Picture -> a -> Picture
-    render assetNameToPicture a = assetNameToPicture (show a)
+-- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
+render :: Show a => Map.Map String Picture -> a -> Maybe Picture
+render assetNameToPicture a = Map.lookup (show a) assetNameToPicture
 
 
 enemySize = 0.5
@@ -29,17 +26,17 @@ bulletSize = 0.1
 
 -- Given a string refering to a data type, this function returns a corresponding picture for that data type.
 asssetNameToPicture :: Map.Map String Picture
-asssetNameToPicture = fromlist [("BasicEnemy", color red circleSolid enemySize),
-                                ("BurstEnemy", color green circleSolid enemySize)
-                                ("ConeEnemy", color yellow circleSolid enemySize)
-                                ("BasicPlayerSeekingEnemy", color pink circleSolid enemySize)
-                                ("FastPlayerSeekingEnemy", color purple circleSolid enemySize)
-                                ("Player", color blue rectangleSolid playerSize playerSize)  
-                                ("BurstFire", color green thickCircle powerupSize lineWidth)
-                                ("ConeFire", color yellow thickCircle powerupSize lineWidth)
-                                ("SpeedBoost", color azure thickCircle powerupSize lineWidth)
-                                ("Bullet", color azure circleSolid bulletSize)
-                               ]
+asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemySize)),
+                                    ("BurstEnemy", color chartreuse (circleSolid enemySize)),
+                                    ("ConeEnemy", color yellow (circleSolid enemySize)),
+                                    ("BasicPlayerSeekingEnemy", color rose (circleSolid enemySize)),
+                                    ("FastPlayerSeekingEnemy", color violet (circleSolid enemySize)),
+                                    ("Player", color blue (rectangleSolid playerSize playerSize)),
+                                    ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
+                                    ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
+                                    ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
+                                    ("Bullet", color azure (circleSolid bulletSize))
+                                   ]
 
 
 -- Return all the pictures of the entire gamestate.
