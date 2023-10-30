@@ -4,18 +4,28 @@ module View.View where
 import Model.GameState
 import Graphics.Gloss
 import qualified Data.Map as Map
+import Model.Player
+import Model.Shooting
+import Model.PowerUp
 
--- Show a screen using Gloss with a circle. Example, delete later.
+-- Show a screen using Gloss with a player and powerup. Example, delete later.
 window :: Display
-window = InWindow "Text" (500, 500) (10, 10)
+window = InWindow "Shoot 'Em Up" (500, 500) (10, 10)
 
 picture :: Picture
-picture = circle 100
+picture = view asssetNameToPicture GameState {player = player1, powerUps = [powerUp1]}
+    where 
+        player1 = Player {playerPos = 20, speed = 5, weapon = Single, lives = 10}
+        powerUp1 = BurstFire {burstFirePos = (30, 30)}
 
 
 -- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
-render :: Show a => Map.Map String Picture -> a -> Maybe Picture
-render assetNameToPicture a = Map.lookup (show a) assetNameToPicture
+render :: Show a => Map.Map String Picture -> a -> Picture
+render assetNameToPicture a = Map.findWithDefault defaultCircle (show a) assetNameToPicture
+-- If the key is not present in the dictionary, show a default circle.
+    where 
+        defaultCircle = circle defaultCircleSize
+        defaultCircleSize = 0.5
 
 
 enemySize = 0.5
