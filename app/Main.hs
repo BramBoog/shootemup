@@ -4,4 +4,4 @@ import View.View
 import Graphics.Gloss
 
 main :: IO ()
-main = display window white picture
+main = display FullScreen black picture
