@@ -36,7 +36,7 @@ class HasPosition a => CanShoot a where
       generateBullet (pos a) (standardBulletDisplacement, -standardBulletDisplacement) downward goesRightWard
     ]
 
-data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector} deriving (Eq, Show)
+data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector}
 
 instance HasPosition Bullet where
   pos = bulletPos
@@ -44,7 +44,10 @@ instance HasPosition Bullet where
 moveBullet :: Bullet -> Bullet
 moveBullet b@Bullet {bulletPos, bulletVector} = b {bulletPos = move bulletPos bulletVector}
 
-data Weapon = Single | Burst | Cone  deriving Show
+data Weapon = Single | Burst | Cone deriving Show
+
+instance Show Bullet where
+    show bullet = "Bullet"
 
 -- All bullet direction vectors
 straight = (bulletHorizontalSpeed, 0)

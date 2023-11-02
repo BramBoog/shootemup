@@ -8,8 +8,11 @@ data Player = Player {
   playerPos :: Position,
   speed :: Float, 
   weapon :: Weapon, 
-  lives :: Int
-} deriving Show
+  lives :: Int 
+}
+
+instance Show Player where
+  show player = "Player"
 
 instance HasPosition Player where
   pos = playerPos
