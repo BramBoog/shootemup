@@ -15,7 +15,7 @@ window = InWindow "Shoot 'Em Up" (500, 500) (10, 10)
 picture :: Picture
 picture = view asssetNameToPicture GameState {player = player1, powerUps = [powerUp1]}
     where 
-        player1 = Player {playerPos = 20, speed = 5, weapon = Single, lives = 10}
+        player1 = Player {playerPos = (20, 20), speed = 5, weapon = Single, lives = 10}
         powerUp1 = BurstFire {burstFirePos = (30, 30)}
 
 
@@ -52,4 +52,7 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
 -- Return all the pictures of the entire gamestate.
 view :: Map.Map String Picture -> GameState -> Picture
 view assetNameToPicture GameState { player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} = 
-    Pictures $ map (render assetNameToPicture) $ player : basicEnemyList ++ burstEnemyList ++ coneEnemyList ++ basicPlayerSeekingEnemyList ++ fastPlayerSeekingEnemyList ++ bullets ++ powerUps
+    Pictures $ map (translate xPos yPos) $ map (render assetNameToPicture) $ player : basicEnemyList ++ burstEnemyList ++ coneEnemyList ++ basicPlayerSeekingEnemyList ++ fastPlayerSeekingEnemyList ++ bullets ++ powerUps
+        where 
+            xPos = fst pos
+            yPos = snd pos
