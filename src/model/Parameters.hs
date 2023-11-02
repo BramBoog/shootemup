@@ -26,6 +26,9 @@ bulletHorizontalSpeed = 0.1
 bulletVerticalSpeed :: Float
 bulletVerticalSpeed = 0.06
 
+standardBulletDisplacement :: Float
+standardBulletDisplacement = 0.02
+
 -- change later to generate randomly
 randomY :: Float
 randomY = 0.5
