@@ -11,6 +11,9 @@ data Player = Player {
   lives :: Int 
 }
 
+instance Show Player where
+  show player = "Player"
+
 instance HasPosition Player where
   pos = playerPos
 

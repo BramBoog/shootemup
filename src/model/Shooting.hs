@@ -44,7 +44,10 @@ instance HasPosition Bullet where
 moveBullet :: Bullet -> Bullet
 moveBullet b@Bullet {bulletPos, bulletVector} = b {bulletPos = move bulletPos bulletVector}
 
-data Weapon = Single | Burst | Cone
+data Weapon = Single | Burst | Cone deriving Show
+
+instance Show Bullet where
+    show bullet = "Bullet"
 
 -- All bullet direction vectors
 straight = (bulletHorizontalSpeed, 0)
