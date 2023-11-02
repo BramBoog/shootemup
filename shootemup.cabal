@@ -8,7 +8,7 @@ maintainer:         bram.boogaarts@gmail.com
 library
   exposed-modules:  Model.Enemy,
                     Model.GameState,
-                    Model.General,
+                    Model.Movement,
                     Model.Parameters,
                     Model.Player,
                     Model.Shooting,

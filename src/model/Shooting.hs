@@ -8,7 +8,7 @@ module Model.Shooting (
   shootWeapon
 ) where
 
-import Model.General (
+import Model.Movement (
     Position,
     Vector,
     HasPosition,
@@ -36,7 +36,7 @@ class HasPosition a => CanShoot a where
       generateBullet (pos a) (standardBulletDisplacement, -standardBulletDisplacement) downward goesRightWard
     ]
 
-data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector}
+data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector} deriving (Eq, Show)
 
 instance HasPosition Bullet where
   pos = bulletPos
@@ -44,7 +44,7 @@ instance HasPosition Bullet where
 moveBullet :: Bullet -> Bullet
 moveBullet b@Bullet {bulletPos, bulletVector} = b {bulletPos = move bulletPos bulletVector}
 
-data Weapon = Single | Burst | Cone
+data Weapon = Single | Burst | Cone  deriving Show
 
 -- All bullet direction vectors
 straight = (bulletHorizontalSpeed, 0)

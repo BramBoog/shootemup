@@ -1,7 +1,6 @@
-module Model.General (
+module Model.Movement (
   Position,
   Vector,
-  Score,
   move,
   outOfBounds,
   HasPosition,
@@ -12,7 +11,6 @@ import Model.Parameters (screenMin, screenMax)
 
 type Position = (Float, Float)
 type Vector   = (Float, Float) -- x and y component
-type Score    = Int
 
 move :: Position -> Vector -> Position
 move (x, y) (dx, dy) = (x + dx, y + dy)

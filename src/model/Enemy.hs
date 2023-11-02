@@ -2,7 +2,7 @@
 {-# LANGUAGE InstanceSigs #-}
 module Model.Enemy where
 
-import Model.General (Position, Vector, move, HasPosition, pos)
+import Model.Movement (Position, Vector, move, HasPosition, pos)
 import Model.Parameters
 import Model.Shooting (
     CanShoot,
@@ -14,11 +14,11 @@ import Model.Shooting (
 import Model.Player
 
 -- All five enemy data types, enemy type class.
-data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float}
-data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float}
-data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float}
-data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float}
-data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position}
+data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float} deriving (Eq, Show)
+data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float} deriving (Eq, Show)
+data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float} deriving (Eq, Show)
+data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float} deriving (Eq, Show)
+data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} deriving (Eq, Show)
 
 instance HasPosition BasicEnemy where
   pos = basicEnemyPos

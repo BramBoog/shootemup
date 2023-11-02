@@ -1,6 +1,6 @@
 module Model.Player where
 
-import Model.General (Position, Vector, HasPosition, pos, move)
+import Model.Movement (Position, Vector, HasPosition, pos, move)
 import Model.Parameters
 import Model.Shooting (Bullet, Weapon, shootWeapon, CanShoot, shoot)
 
@@ -8,8 +8,8 @@ data Player = Player {
   playerPos :: Position,
   speed :: Float, 
   weapon :: Weapon, 
-  lives :: Int 
-}
+  lives :: Int
+} deriving Show
 
 instance HasPosition Player where
   pos = playerPos
