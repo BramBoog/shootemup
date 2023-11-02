@@ -10,15 +10,15 @@ import Model.PowerUp
 import Model.General
 import Model.General
 
--- Show a screen using Gloss with a player and powerup. Example, delete later.
 window :: Display
-window = InWindow "Shoot 'Em Up" (500, 500) (0, 0)
+window = InWindow "Shoot 'Em Up" (800, 500) (0, 0)
 
-picture :: Picture
-picture = view GameState {player = player1, enemies = ([], [], [], [], []), bullets = [], powerUps = [powerUp1]}
+-- Show a screen using Gloss with a player and powerup. Example, delete later.
+examplePicture :: Picture
+examplePicture = view GameState {isPaused = False, player = player1, enemies = ([], [], [], [], []), bullets = [], score = 1, powerUps = [powerUp1]}
     where 
-        player1 = Player {playerPos = (20, 20), speed = 5, weapon = Single, lives = 10}
-        powerUp1 = BurstFire {burstFirePos = (30, 30)}
+        player1 = Player {playerPos = (-360, 100), speed = 5, weapon = Single, lives = 10}
+        powerUp1 = BurstFire {burstFirePos = (-360, -200)}
 
 
 -- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
@@ -27,14 +27,14 @@ render assetNameToPicture gameObject = Map.findWithDefault defaultCircle (show g
 -- If the key is not present in the dictionary, show a default circle.
     where 
         defaultCircle = circle defaultCircleSize
-        defaultCircleSize = 0.5
+        defaultCircleSize = 30
 
 
-enemySize = 0.5
-playerSize = 0.5
-powerupSize = 0.3
-lineWidth = 0.2
-bulletSize = 0.1
+enemySize = 50
+playerSize = 50
+powerupSize = 20
+lineWidth = 6
+bulletSize = 20
 
 -- Given a string refering to a data type, this function returns a corresponding picture for that data type.
 asssetNameToPicture :: Map.Map String Picture
@@ -53,10 +53,9 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture
-translatePicture picture gameObject = translate xPos yPos picture
+translatePicture picture gameObject = translate x y picture
     where 
-        xPos = fst (pos gameObject)
-        yPos = snd (pos gameObject)
+        (x, y) = pos gameObject
 
 
 --Given a gameObject, return the right picture on the correct place.
