@@ -2,132 +2,121 @@
 {-# LANGUAGE InstanceSigs #-}
 module Model.Enemy where
 
-import Model.General (Position, Vector)
-import Model.Shooting (Bullet (Bullet, bulletPos, bulletVector))
+import Model.General (Position, Vector, move, HasPosition, pos)
+import Model.Parameters
+import Model.Shooting (
+    CanShoot,
+    shoot,
+    shootWeapon,
+    Bullet (Bullet, bulletPos, bulletVector),
+    Weapon (Single, Burst, Cone)
+  )
 import Model.Player
 
 -- All five enemy data types, enemy type class.
-data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Int}
-data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Int}
-data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Int}
-data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Int}
+data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float}
+data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float}
+data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float}
+data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float}
 data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position}
 
+instance HasPosition BasicEnemy where
+  pos = basicEnemyPos
+
+instance HasPosition BurstEnemy where
+  pos = burstEnemyPos
+
+instance HasPosition ConeEnemy where
+  pos = coneEnemyPos
+
+instance HasPosition BasicPlayerSeekingEnemy where
+  pos = basicSeekingPos
+
+instance HasPosition FastPlayerSeekingEnemy where
+  pos = fastSeekingPos
 
 -- All enemies are instances of this class.
-class Enemy a where 
-    -- Given an enemy and a bullet, return these arguments if the enemy is hit for despawning both. 
-    hit:: a -> Bullet -> Maybe (a, Bullet) 
-    -- Render enemy at a random vertical position.
-    spawn :: a
-    -- Return the position of an Enemy
-    pos :: a -> Position
+class HasPosition a => Enemy a where 
+  -- Given an enemy and a bullet, return these arguments if the enemy is hit for despawning both. 
+  hit :: a -> Bullet -> Maybe (a, Bullet)
+  hit e b | pos e == bulletPos b = Just (e, b) -- Enemy is hit. Change to this later: if the position is approximately equal.
+          | otherwise = Nothing -- Enemy is not hit.
+  -- Render enemy at a random vertical position.
+  spawn :: a
 
--- Default values, change these later.
-screenWidth :: Int
-screenWidth = 500
-randomY :: Int
-randomY = 300   
-
--- Implementation of method 'hit' for each given enemy. 
-enemyIsHit :: Enemy e => e -> Bullet -> Maybe (e, Bullet)
-enemyIsHit e b | pos e == bulletPos b = Just (e, b) -- Enemy is hit. Change to this later: if the position is approximately equal.
-               | otherwise = Nothing -- Enemy is not hit.
-
--- Enemy types as instances of type class Enemy (Too much repitition?)
+-- Enemy types as instances of type class Enemy
 instance Enemy BasicEnemy where
-        hit = enemyIsHit
-        spawn = BasicEnemy {basicEnemyPos = (screenWidth, randomY) , basicEnemyCooldown = cooldown} -- Spawn an enemy at right with a random y pos.
-                where -- Default value, change this later.
-                        cooldown = 2
-        pos = basicEnemyPos
+  spawn = BasicEnemy {basicEnemyPos = (screenMax, randomY) , basicEnemyCooldown = enemyShootingCooldown} -- Spawn an enemy at right with a random y pos.
 
 instance Enemy BurstEnemy where
-        hit = enemyIsHit
-        spawn = BurstEnemy {burstEnemyPos = (screenWidth, randomY) , burstEnemyCooldown = cooldown}  
-                where
-                        cooldown = 3
-        pos = burstEnemyPos
+  spawn = BurstEnemy {burstEnemyPos = (screenMax, randomY) , burstEnemyCooldown = enemyShootingCooldown}  
 
 instance Enemy ConeEnemy where
-        hit = enemyIsHit
-        spawn = ConeEnemy {coneEnemyPos = (screenWidth, randomY) , coneEnemyCooldown = cooldown}    
-                where
-                        cooldown = 2
-        pos = coneEnemyPos
+  spawn = ConeEnemy {coneEnemyPos = (screenMax, randomY) , coneEnemyCooldown = enemyShootingCooldown}    
 
 instance Enemy BasicPlayerSeekingEnemy where
-        hit = enemyIsHit
-        spawn = BasicPlayerSeekingEnemy {basicSeekingPos = (screenWidth, randomY) , basicSeekingCooldown = cooldown}      
-                where
-                        cooldown = 1
-        pos = basicSeekingPos
+  spawn = BasicPlayerSeekingEnemy {basicSeekingPos = (screenMax, randomY) , basicSeekingCooldown = enemyShootingCooldown}      
 
 instance Enemy FastPlayerSeekingEnemy where
-        hit = enemyIsHit
-        spawn = FastPlayerSeekingEnemy {fastSeekingPos = (screenWidth, randomY)}     
-        pos = fastSeekingPos
+  spawn = FastPlayerSeekingEnemy {fastSeekingPos = (screenMax, randomY)}     
        
 
 -- All enemies, except the player seeking types, are instances of this class.
-class MoveBasic a where 
-        moveBasic :: a -> a 
+class Enemy a => MoveBasic a where 
+  moveBasic :: a -> a 
     
 instance MoveBasic BasicEnemy where
-        moveBasic b = let (x, y) = pos b in
-                b {basicEnemyPos = (x - 1, y)}
+  moveBasic b = let vec = (-basicEnemyHorizontalSpeed, 0)
+                    p   = pos b
+                 in b {basicEnemyPos = move p vec}
 
 instance MoveBasic BurstEnemy where
-        moveBasic b = let (x, y) = pos b in
-                b {burstEnemyPos = (x - 1, y)}
+  moveBasic b = let vec = (-basicEnemyHorizontalSpeed, 0)
+                    p   = pos b
+                 in b {burstEnemyPos = move p vec}
 
 instance MoveBasic ConeEnemy where
-        moveBasic c = let (x, y) = pos c in
-                c {coneEnemyPos = (x - 1, y)} 
+  moveBasic b = let vec = (-basicEnemyHorizontalSpeed, 0)
+                    p   = pos b
+                 in b {coneEnemyPos = move p vec}
 
+-- Only the two player seeking enemies are instances of this class.
+class Enemy a => MovePlayerSeeking a where 
+  moveSeeking :: a -> Player -> a
 
-    -- Only the two player seeking enemies are instances of this class.
-class MovePlayerSeeking a where 
-        moveSeeking :: a -> Player -> a        
+  -- Determines whether the enemy needs to move up, down, or neither to get closer to the player vertically
+  yMovementSign :: a -> Player -> Float
+  yMovementSign e player | y < playerY = 1
+                         | y == playerY = 0
+                         | otherwise = -1
+    where (_, y) = pos e
+          playerY = snd $ playerPos player
 
 instance MovePlayerSeeking BasicPlayerSeekingEnemy where
-        moveSeeking b player = let (x, y) = pos b in
-                b {basicSeekingPos = (x - 1, y + seeking_speed * (y - playerPos player))} -- The vertical movement is based on the vertical distance between player and enemy.
-                where seeking_speed = 1 -- How fast the enemy approaches the player vertically
-                
+  moveSeeking b player = let p    = pos b
+                             sign = yMovementSign b player
+                             vec  = (-basicEnemyHorizontalSpeed, basicEnemyVerticalSpeed * sign)
+                         in b {basicSeekingPos = move p vec}
 
 instance MovePlayerSeeking FastPlayerSeekingEnemy where
-        moveSeeking :: FastPlayerSeekingEnemy -> Player -> FastPlayerSeekingEnemy
-        moveSeeking f player = let (x, y) = pos f in
-                f {fastSeekingPos = (x - 1, y + seeking_speed * (y - playerPos player))}
-                where seeking_speed = 2
-
-
-
--- All enemies, except the fast player seeking type, are instances of this class.
-class CanShoot a where 
-        shoot :: a -> [Bullet] 
-
--- All bullet direction vectors
-left = (-1, 0)
-upward   = (-1, 1)
-downward = (-1, -1)
+  moveSeeking b player = let p    = pos b
+                             sign = yMovementSign b player
+                             vec  = (-fastEnemyHorizontalSpeed, fastEnemyVerticalSpeed * sign)
+                          in b {fastSeekingPos = move p vec}
 
 instance CanShoot BasicEnemy where
-        shoot b = [Bullet {bulletPos = pos b, bulletVector = left}] -- One bullet
+  shoot b = shootWeapon Single b False
                 
 instance CanShoot BurstEnemy where
-        shoot b = let (x, y) = pos b in
-                [Bullet {bulletPos = (x, y), bulletVector = left}, Bullet {bulletPos = (x + 1, y), bulletVector = left}, Bullet {bulletPos = (x + 2, y), bulletVector = left}] -- Three bullets in one horizontal line, two start a bit to the left of the enemy.
+  shoot b = shootWeapon Burst b False
 
 instance CanShoot ConeEnemy where
-        shoot c = [Bullet  {bulletPos = pos c, bulletVector = left}, Bullet  {bulletPos = pos c, bulletVector = upward}, Bullet  {bulletPos = pos c, bulletVector = downward}] -- Three bullets in three different directions
+  shoot c = shootWeapon Cone c False
 
 instance CanShoot BasicPlayerSeekingEnemy where
-        shoot b = [Bullet {bulletPos = pos b, bulletVector = left}] -- One bullet
-   
-        
-        
+  shoot b = shootWeapon Single b False
+      
+  
 -- Show is used to in a dictionary in View to return a picture for each renderable data type.
 instance Show BasicEnemy where
         show basicEnemy = "BasicEnemy"
