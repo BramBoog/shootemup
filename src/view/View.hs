@@ -2,24 +2,15 @@
 module View.View where
 
 import Model.GameState
-import Graphics.Gloss
+import Model.Parameters (screenMaxX, screenMaxY)
+import Model.Movement
+import GHC.Float (float2Int)
 import qualified Data.Map as Map
-import Model.Player
-import Model.Shooting
-import Model.PowerUp
-import Model.General
-import Model.General
+import Graphics.Gloss
+
 
 window :: Display
-window = InWindow "Shoot 'Em Up" (800, 500) (0, 0)
-
--- Show a screen using Gloss with a player and powerup. Example, delete later.
-examplePicture :: Picture
-examplePicture = view GameState {isPaused = False, player = player1, enemies = ([], [], [], [], []), bullets = [], score = 1, powerUps = [powerUp1]}
-    where 
-        player1 = Player {playerPos = (-360, 100), speed = 5, weapon = Single, lives = 10}
-        powerUp1 = BurstFire {burstFirePos = (-360, -200)}
-
+window = InWindow "Shoot 'Em Up" (2 * float2Int screenMaxX, 2 * float2Int screenMaxY) (0, 0)
 
 -- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
 render :: Show gameObject => Map.Map String Picture -> gameObject -> Picture
@@ -30,11 +21,12 @@ render assetNameToPicture gameObject = Map.findWithDefault defaultCircle (show g
         defaultCircleSize = 30
 
 
-enemySize = 50
+enemySize = 20
 playerSize = 50
 powerupSize = 20
 lineWidth = 6
-bulletSize = 20
+bulletSizeX = 7
+bulletSizeY = 3
 
 -- Given a string refering to a data type, this function returns a corresponding picture for that data type.
 asssetNameToPicture :: Map.Map String Picture
@@ -47,7 +39,7 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
                                     ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
                                     ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
                                     ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
-                                    ("Bullet", color azure (circleSolid bulletSize))
+                                    ("Bullet", color white (rectangleSolid bulletSizeX bulletSizeY))
                                    ]
 
 
@@ -65,16 +57,19 @@ givePicture gameObject = translatePicture renderedGameObject gameObject
 
 
 -- Return all the pictures of the entire gamestate.
-view :: GameState -> Picture
-view GameState { player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} = 
+viewPure :: GameState -> Picture
+viewPure GameState { player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} = 
     Pictures (playerPicture : basicEnemyListPicture ++ burstEnemyListPicture ++ coneEnemyListPicture ++ basicPlayerSeekingEnemyListPicture ++ fastPlayerSeekingEnemyListPicture ++ bulletsPicture ++ powerUpsPicture)
         where 
             -- Lists of the pictures per game object type, translated to the right position
-            playerPicture = givePicture player 
-            basicEnemyListPicture = map givePicture burstEnemyList
-            burstEnemyListPicture = map givePicture coneEnemyList
-            coneEnemyListPicture = map givePicture basicPlayerSeekingEnemyList
+            playerPicture = givePicture player
+            basicEnemyListPicture = map givePicture basicEnemyList
+            burstEnemyListPicture = map givePicture burstEnemyList
+            coneEnemyListPicture = map givePicture coneEnemyList
             basicPlayerSeekingEnemyListPicture = map givePicture basicPlayerSeekingEnemyList
             fastPlayerSeekingEnemyListPicture = map givePicture fastPlayerSeekingEnemyList
             bulletsPicture = map givePicture bullets
             powerUpsPicture = map givePicture powerUps
+
+view :: GameState -> IO Picture
+view = return . viewPure

@@ -1,14 +1,21 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Model.Player where
 
-import Model.Movement (Position, Vector, HasPosition, pos, move)
-import Model.Parameters
-import Model.Shooting (Bullet, Weapon, shootWeapon, CanShoot, shoot)
+import Model.Movement (Position, Vector, HasPosition (pos, hit), move)
+import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown)
+import Model.Shooting (
+    Bullet,
+    Weapon,
+    CanShoot (cooldown, lowerCooldown, resetCooldown, weapon, shootsRightward)
+  )
+import Data.Maybe (mapMaybe)
 
 data Player = Player {
   playerPos :: Position,
-  speed :: Float, 
-  weapon :: Weapon, 
-  lives :: Int 
+  speed :: Float,
+  playerWeapon :: Weapon,
+  lives :: Int,
+  playerCooldown :: Float
 }
 
 instance Show Player where
@@ -18,16 +25,19 @@ instance HasPosition Player where
   pos = playerPos
 
 instance CanShoot Player where
-  shoot p = shootWeapon (weapon p) p True
+  shootsRightward _ = True
+  cooldown = playerCooldown
+  lowerCooldown t p@Player{playerCooldown} = p{playerCooldown = playerCooldown - t}
+  resetCooldown p@Player{playerCooldown} = p{playerCooldown = playerShootingCooldown}
+  weapon = playerWeapon
 
 -- player only moves in y, cannot move beyond max and min y
 movePlayer :: Player -> Float -> Player
 movePlayer pl dy = let p = playerPos pl
                        s = speed pl
                        (x, y) = move p (0, dy * s)
-                    in pl {playerPos = (x, min (max y screenMin) screenMax)}
+                    in pl {playerPos = (x, min (max y screenMinY) screenMaxY)}
 
--- Determine if a bullet hits a player. Can use later to despawn the bullet and subtract a life from the player.
-playerIsHit :: Player -> Bullet -> Maybe Bullet
-playerIsHit p b = if pos p == pos b then Just b
-                                    else Nothing
+-- For a list of objects of a certain type, obtain all objects which have hit the player
+hitsOnPlayer :: HasPosition a => Player -> [a] -> [a]
+hitsOnPlayer p = map snd . mapMaybe (hit p) -- mapMaybe throws out all Nothings and returns a [(Player, a)], so we need map snd to get [a]
