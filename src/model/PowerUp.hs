@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Model.PowerUp where
 
-import Model.General (Position, HasPosition (pos))
+import Model.Movement (Position, HasPosition (pos))
   
 data PowerUp = BurstFire {burstFirePos :: Position}
               | ConeFire {coneFirePos :: Position}
