@@ -22,11 +22,11 @@ keyboardInputHandler (EventKey pressedButton _ _ _) gameState  = case phase game
     SpecialKey KeyDown -> gameState {player = movePlayer (player gameState) ((-1) * verticalMovementStep)} -- Move the player with the downwards.
     Char r -> initalState -- Reset the gamestate to the initalGamestate by pressing r.
     Char s -> gameState {bullets = bullets gameState ++ shoot (player gameState)} -- Shoot when 's' is pressed, update the current bullet list of the gamestate with the new bullet(s).
-    Char p -> gameState {gamePhase =  Paused} -- Pause the game.
+    Char p -> gameState {phase =  Paused} -- Pause the game.
   -- When the game is paused, you can only reset the game, unpause or save the gamestate to JSON.
   Paused -> case pressedButton of
     Char r -> initalState
-    Char p -> gameState {gamePhase =  Playing} -- Unpause the game.
+    Char p -> gameState {phase =  Playing} -- Unpause the game.
     -- Char q -> -- Save gameState to JSON.
   -- When game over, you can only reset the game.
   GameOver -> case pressedButton of
