@@ -1,12 +1,24 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Controller.Controller where
-import Graphics.Gloss.Interface.IO.Game
+
 import Model.GameState
 import Model.Player (movePlayer)
 import Model.Shooting
+import Graphics.Gloss
+import Graphics.Gloss.Interface.IO.Game
+
+step :: Float -> GameState -> IO GameState
+step elapsedTime gs = return (updateOnStep elapsedTime gs)
+
+input :: Event -> GameState -> IO GameState
+input _ = return
 
 -- This function takes an event, a certain keyboard input, and a current gamestate, and returns the new gamestate.
 keyboardInputHandler :: Event -> GameState -> GameState
+keyboardInputHandler (EventKey pressedButton _ _ _) gameState  = case phase gamestate of
+  
+
+
 
 keyboardInputHandler (EventKey pressedButton _ _ _) gameState  = case pressedButton of
   Char r -> initalGameState -- Reset the gamestate to the initalGamestate by pressing r, variable does not exist yet.

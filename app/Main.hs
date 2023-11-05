@@ -1,7 +1,16 @@
 module Main where
 
+import Controller.Controller
 import View.View
-import Graphics.Gloss
+import Model.GameState (initialState)
+
+import Graphics.Gloss.Interface.IO.Game
 
 main :: IO ()
-main = display window black examplePicture
+main = playIO window
+              black
+              10
+              initialState
+              view
+              input
+              step

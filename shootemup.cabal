@@ -8,12 +8,13 @@ maintainer:         bram.boogaarts@gmail.com
 library
   exposed-modules:  Model.Enemy,
                     Model.GameState,
-                    Model.General,
+                    Model.Movement,
                     Model.Parameters,
                     Model.Player,
                     Model.Shooting,
                     Model.PowerUp,
-                    View.View
+                    View.View,
+                    Controller.Controller
 
   -- Modules included in this library but not exported.
   -- other-modules:
