@@ -27,12 +27,23 @@ standardBulletDisplacement, burstBulletDisplacement :: Float
 standardBulletDisplacement = 0.02
 burstBulletDisplacement = 20
 
--- change later to generate randomly
-randomY :: Float
-randomY = 0.5
 
 -- time
-
 enemyShootingCooldown, playerShootingCooldown :: Float
 enemyShootingCooldown = 4
 playerShootingCooldown = 3
+
+
+-- Spawning probabilities
+
+timeToHardestGameState :: Float
+timeToHardestGameState = 600 -- 10 minutes
+
+spawnEnemyOnStepProbabilityModifier :: Float
+spawnEnemyOnStepProbabilityModifier = 0.3
+
+burstEnemyThreshold, coneEnemyThreshold, basicSeekingEnemyThreshold, fastSeekingEnemyThreshold :: Float
+burstEnemyThreshold = 0.1
+coneEnemyThreshold = 0.2
+basicSeekingEnemyThreshold = 0.3
+fastSeekingEnemyThreshold = 0.4

@@ -20,12 +20,14 @@ data GameState = GameState {
   ),
   bullets :: [Bullet],
   score :: Score,
-  powerUps :: [PowerUp]
+  powerUps :: [PowerUp],
+  elapsedTime :: Float
 } deriving Show
 
 data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
 type Score = Int
-type GameStateTransform = GameState -> GameState
+type GameStateTransform   = GameState -> GameState
+type GameStateTransformIO = GameState -> IO GameState
 
 initialState :: GameState
 initialState = GameState {
@@ -34,17 +36,23 @@ initialState = GameState {
   enemies = initialEnemies,
   bullets = [],
   score = 0,
-  powerUps = initialPowerUps
+  powerUps = initialPowerUps,
+  elapsedTime = 0
 }
   where 
     initialPlayer = Player {playerPos = (-360, 100), speed = 5, playerWeapon = Single, lives = 10, playerCooldown = 5}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (-360, -200)}]
 
+-- Update the elapsedTime field of the GameState with the elapsed time given by the step function.
+updateElapsedTime :: Float -> GameStateTransform
+updateElapsedTime t gs = gs{elapsedTime = elapsedTime gs + t}
 
+-- Move all bullets in the GameState.
 moveBullets :: GameStateTransform
 moveBullets gs = gs{bullets = map moveBullet (bullets gs)}
 
+-- Move all enemies in the GameState.
 enemiesMove :: GameStateTransform
 enemiesMove gs@GameState{
   player,
@@ -162,18 +170,22 @@ gameOverIfNoLives :: GameStateTransform
 gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = GameOver}
                                          else gs
 
--- Combine all GameStateTransforms that occur on a time step into one, the game is in Playing phase.
+spawnNewEnemy :: GameStateTransformIO
+spawnNewEnemy gs = undefined
+
+-- Combine all GameStateTransforms that occur on a time step into one, if the game is in Playing phase.
 updateOnStep :: Float -> GameStateTransform
-updateOnStep t gs@GameState{phase} = case phase of                    -- read these in reverse order, since that's the order they're applied
-                                       Playing -> gameOverIfNoLives   -- finally, transition to GameOver phase if player has lost all lives
-                                                $ despawnOutOfBounds -- despawn all bullets and enemies which have gone out of bounds
-                                                $ takeHitsPlayer     -- and check again if the player has been hit
-                                                $ enemiesMove        -- then move the enemies
-                                                $ takeHitsPlayer     -- and if the player has been hit
-                                                $ killEnemies        -- after moving bullets, check if that killed any enemies
+updateOnStep t gs@GameState{phase} = case phase of                      -- read these in reverse order, since that's the order they're applied
+                                       Playing -> gameOverIfNoLives     -- finally, transition to GameOver phase if player has lost all lives
+                                                $ despawnOutOfBounds    -- despawn all bullets and enemies which have gone out of bounds
+                                                $ takeHitsPlayer        -- and check again if the player has been hit
+                                                $ enemiesMove           -- then move the enemies
+                                                $ takeHitsPlayer        -- and if the player has been hit
+                                                $ killEnemies           -- after moving bullets, check if that killed any enemies
                                                 $ moveBullets
                                                 $ enemiesShoot
-                                                $ lowerCooldowns t gs
+                                                $ lowerCooldowns t
+                                                $ updateElapsedTime t gs
                                        _ -> gs
 
 class Despawnable a where

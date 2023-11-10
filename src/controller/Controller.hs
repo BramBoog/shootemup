@@ -20,19 +20,19 @@ keyboardInputHandler (EventKey pressedButton _ _ _) gameState@GameState{player, 
   Playing -> case pressedButton of
     SpecialKey KeyUp -> gameState {player =  movePlayer player verticalMovementStep} -- Move the player upwards.
     SpecialKey KeyDown -> gameState {player = movePlayer player ((-1) * verticalMovementStep)} -- Move the player downwards.
-    Char r -> initialState -- Reset the gamestate to the initalGamestate by pressing r.
-    Char s -> let (updatedPlayer, newBulletList) = shoot player in gameState {player = updatedPlayer, bullets = bullets ++ newBulletList} -- Shoot when 's' is pressed, update the player cooldown and the current bullet list of the gamestate with the new bullet(s).
-    Char p -> gameState {phase =  Paused} -- Pause the game.
+    Char 'r' -> initialState -- Reset the gamestate to the initalGamestate by pressing r.
+    Char 's' -> let (updatedPlayer, newBulletList) = shoot player in gameState {player = updatedPlayer, bullets = bullets ++ newBulletList} -- Shoot when 's' is pressed, update the player cooldown and the current bullet list of the gamestate with the new bullet(s).
+    Char 'p' -> gameState {phase =  Paused} -- Pause the game.
     _ -> gameState -- When another key is pressed, do nothing.
   -- When the game is paused, you can only reset the game, unpause or save the gamestate to JSON.
   Paused -> case pressedButton of
-    Char r -> initialState
-    Char p -> gameState {phase =  Playing} -- Unpause the game.
+    Char 'r' -> initialState
+    Char 'p' -> gameState {phase =  Playing} -- Unpause the game.
     _ -> gameState
     -- Char q -> -- Save gameState to JSON.
   -- When game over, you can only reset the game.
   GameOver -> case pressedButton of
-    Char r -> initialState
+    Char 'r' -> initialState
     _ -> gameState
 
 -- Nothing happens if any other type of keyboard event is triggered.
