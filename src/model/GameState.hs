@@ -6,6 +6,7 @@ import Model.Player
 import Model.Enemy
 import Model.Shooting
 import Model.PowerUp
+import View.Animations
 import Data.List ((\\))
 
 data GameState = GameState {
@@ -20,7 +21,8 @@ data GameState = GameState {
   ),
   bullets :: [Bullet],
   score :: Score,
-  powerUps :: [PowerUp]
+  powerUps :: [PowerUp],
+  animations :: [Animation]
 } deriving Show
 
 data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
