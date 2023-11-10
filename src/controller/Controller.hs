@@ -11,17 +11,17 @@ step :: Float -> GameState -> IO GameState
 step elapsedTime gs = return (updateOnStep elapsedTime gs)
 
 input :: Event -> GameState -> IO GameState
-input _ = return
+input event gamestate = return (keyboardInputHandler event gamestate)
 
 -- This function takes an event, a certain keyboard input, and a current gamestate, and returns the new gamestate.
 keyboardInputHandler :: Event -> GameState -> GameState
-keyboardInputHandler (EventKey pressedButton _ _ _) gameState  = case phase gameState of
+keyboardInputHandler (EventKey pressedButton _ _ _) gameState@GameState{player, bullets}  = case phase gameState of
   -- If the gamephase is 'playing', the following input is considered:
   Playing -> case pressedButton of
-    SpecialKey KeyUp -> gameState {player =  movePlayer (player gameState) verticalMovementStep} -- Move the player upwards.
-    SpecialKey KeyDown -> gameState {player = movePlayer (player gameState) ((-1) * verticalMovementStep)} -- Move the player downwards.
+    SpecialKey KeyUp -> gameState {player =  movePlayer player verticalMovementStep} -- Move the player upwards.
+    SpecialKey KeyDown -> gameState {player = movePlayer player ((-1) * verticalMovementStep)} -- Move the player downwards.
     Char r -> initialState -- Reset the gamestate to the initalGamestate by pressing r.
-    Char s -> gameState {bullets = bullets gameState ++ snd (shoot (player gameState))} -- Shoot when 's' is pressed, update the current bullet list of the gamestate with the new bullet(s).
+    Char s -> let (updatedPlayer, newBulletList) = shoot player in gameState {player = updatedPlayer, bullets = bullets ++ newBulletList} -- Shoot when 's' is pressed, update the player cooldown and the current bullet list of the gamestate with the new bullet(s).
     Char p -> gameState {phase =  Paused} -- Pause the game.
     _ -> gameState -- When another key is pressed, do nothing.
   -- When the game is paused, you can only reset the game, unpause or save the gamestate to JSON.
