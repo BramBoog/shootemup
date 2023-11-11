@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Model.GameState where
 
-import Model.Movement (outOfBounds, Position)
+import Model.Movement (outOfBounds, Position, HasPosition (pos))
 import Model.Player
 import Model.Enemy
 import Model.Shooting
@@ -35,9 +35,10 @@ initialState = GameState {
   enemies = initialEnemies,
   bullets = [],
   score = 0,
-  powerUps = initialPowerUps
+  powerUps = initialPowerUps,
+  animations = []
 }
-  where 
+  where
     initialPlayer = Player {playerPos = (-360, 100), speed = 5, playerWeapon = Single, lives = 10, playerCooldown = 5}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (-360, -200)}]
@@ -74,7 +75,7 @@ despawnOutOfBounds gs@GameState{
       $ despawn coneOutOfBounds
       $ despawn basicSeekingOutOfBounds
       $ despawn fastSeekingOutOfBounds
-      $ despawn bulletsOutOfBounds gs 
+      $ despawn bulletsOutOfBounds gs
 
 -- Determines which enemies have been hit by bullets and despawns both them and the corresponding bullets.
 killEnemies :: GameStateTransform
@@ -143,7 +144,7 @@ takeHitsPlayer gs@GameState{
         fastSeekingHit  = hitsOnPlayer player fastPlayerSeekingEnemies
         bulletsHit      = hitsOnPlayer player bullets
         lostLives       = length basicHit
-                        + length burstHit 
+                        + length burstHit
                         + length coneHit
                         + length basicSeekingHit
                         + length fastSeekingHit
@@ -183,26 +184,34 @@ class Despawnable a where
 -- Use list difference operator \\ to remove elements to despawn from each list
 instance Despawnable BasicEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                   in gs {enemies = (basics \\ es, bursts, cones, basicseekings, fastseekings)}
+                  in gs {enemies = (basics \\ es, bursts, cones, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
 
 instance Despawnable BurstEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                   in gs {enemies = (basics, bursts \\ es, cones, basicseekings, fastseekings)}
+                  in gs {enemies = (basics, bursts \\ es, cones, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
 
 instance Despawnable ConeEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                   in gs {enemies = (basics, bursts, cones \\ es, basicseekings, fastseekings)}
+                  in gs {enemies = (basics, bursts, cones \\ es, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
 
 instance Despawnable BasicPlayerSeekingEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                   in gs {enemies = (basics, bursts, cones, basicseekings \\ es, fastseekings)}
+                  in gs {enemies = (basics, bursts, cones, basicseekings \\ es, fastseekings), animations = despawnAnimations es ++ animations gs}
 
 instance Despawnable FastPlayerSeekingEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                   in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es)}
+                  in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es), animations = despawnAnimations es ++ animations gs}
+
+--Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
+despawnAnimations :: (Despawnable a, HasPosition a) => [a] -> [Animation]
+despawnAnimations es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e}) es
+
 
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
 
+  
 -- Data type which will be stored in a queue in gamestate for animation, the animations will be waiting to be played, each with a type and position.
-data Animation = Animation {animationType :: String, animationPos :: Position}        
+data Animation = Animation {animationType :: AnimationType, animationPos :: Position}
+-- Depending on the animationType, different particles will be used for the animation.    
+data AnimationType = PowerUpAnimation | BulletAnimation | DespawnAnimation
