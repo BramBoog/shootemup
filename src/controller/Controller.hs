@@ -7,10 +7,10 @@ import Model.Shooting
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
-step :: Float -> GameState -> IO GameState
-step elapsedTime gs = return (updateOnStep elapsedTime gs)
+step :: Float -> GameStateTransformIO
+step = updateOnStep
 
-input :: Event -> GameState -> IO GameState
+input :: Event -> GameStateTransformIO
 input event gamestate = return (keyboardInputHandler event gamestate)
 
 -- This function takes an event, a certain keyboard input, and a current gamestate, and returns the new gamestate.

@@ -2,11 +2,16 @@ module Model.Parameters where
 
 -- movement and position
 
-screenMinX, screenMaxX, screenMinY, screenMaxY :: Float
-screenMinX = -400
-screenMaxX = 400
-screenMinY = -250
-screenMaxY = 250
+screenSizeX, screenSizeY, screenMinX, screenMaxX, screenMinY, screenMaxY :: Float
+screenSizeX = 800
+screenMinX = -screenSizeX
+screenMaxX = screenSizeX
+screenSizeY = 450
+screenMinY = -screenSizeY
+screenMaxY = screenSizeY
+
+playerX :: Float
+playerX = screenMinX + 50
 
 basicEnemyHorizontalSpeed, basicEnemyVerticalSpeed, fastEnemyHorizontalSpeed, fastEnemyVerticalSpeed :: Float
 basicEnemyHorizontalSpeed = 2
@@ -27,6 +32,13 @@ standardBulletDisplacement, burstBulletDisplacement :: Float
 standardBulletDisplacement = 0.02
 burstBulletDisplacement = 20
 
+enemySize, playerSize, powerupSize, lineWidth, bulletSizeX, bulletSizeY :: Float
+enemySize = 20
+playerSize = 50
+powerupSize = 20
+lineWidth = 6
+bulletSizeX = 7
+bulletSizeY = 3
 
 -- time
 enemyShootingCooldown, playerShootingCooldown :: Float
@@ -36,14 +48,18 @@ playerShootingCooldown = 3
 
 -- Spawning probabilities
 
-timeToHardestGameState :: Float
+timeToHardestGameState :: Double
 timeToHardestGameState = 600 -- 10 minutes
 
-spawnEnemyOnStepProbabilityModifier :: Float
-spawnEnemyOnStepProbabilityModifier = 0.3
+spawnPowerUpOnStepProbability :: Double
+spawnPowerUpOnStepProbability = 0.01
 
-burstEnemyThreshold, coneEnemyThreshold, basicSeekingEnemyThreshold, fastSeekingEnemyThreshold :: Float
-burstEnemyThreshold = 0.1
-coneEnemyThreshold = 0.2
-basicSeekingEnemyThreshold = 0.3
-fastSeekingEnemyThreshold = 0.4
+spawnEnemyOnStepProbability :: Double
+spawnEnemyOnStepProbability = 0.05
+
+basicEnemyModifier, burstEnemyModifier, coneEnemyModifier, basicSeekingEnemyModifier, fastSeekingEnemyModifier :: Double
+basicEnemyModifier = 1.8
+burstEnemyModifier = 1.6
+coneEnemyModifier = 1.4
+basicSeekingEnemyModifier = 1.2
+fastSeekingEnemyModifier = 1

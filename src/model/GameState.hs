@@ -6,7 +6,11 @@ import Model.Player
 import Model.Enemy
 import Model.Shooting
 import Model.PowerUp
+import Model.Parameters
+import Model.Randomness
 import Data.List ((\\))
+import GHC.Float (float2Double)
+
 
 data GameState = GameState {
   phase :: GamePhase,
@@ -40,9 +44,9 @@ initialState = GameState {
   elapsedTime = 0
 }
   where 
-    initialPlayer = Player {playerPos = (-360, 100), speed = 5, playerWeapon = Single, lives = 10, playerCooldown = 5}
+    initialPlayer = Player {playerPos = (playerX, 0), speed = playerNormalVerticalSpeed, playerWeapon = Single, lives = 10, playerCooldown = 5}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
-    initialPowerUps = [BurstFire {burstFirePos = (-360, -200)}]
+    initialPowerUps = [BurstFire {burstFirePos = (playerX, -200)}]
 
 -- Update the elapsedTime field of the GameState with the elapsed time given by the step function.
 updateElapsedTime :: Float -> GameStateTransform
@@ -170,24 +174,59 @@ gameOverIfNoLives :: GameStateTransform
 gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = GameOver}
                                          else gs
 
+-- Randomly determine whether to spawn a new random enemy. If so, its type and starting y coordinate are randomly determined.
 spawnNewEnemy :: GameStateTransformIO
-spawnNewEnemy gs = undefined
+spawnNewEnemy gs = do p <- generateProbability
+                      if p <= spawnEnemyOnStepProbability then do r <- generateProbability
+                                                                  print enemyProbs
+                                                                  spawnTransform <- chooseWithProb enemyProbDist
+                                                                  spawnTransform gs
+                      else return gs
+  where
+    -- Create a probability distribution of GameStateTranformIOs, each spawning a different enemy type
+    enemyProbDist :: ProbDist GameStateTransformIO
+    enemyProbDist = ProbDist (zip enemyProbs spawnEnemyTransforms)
+
+    -- Makes each enemy type more likely to appear as time goes on, by increasing the probability modifier for each type, until it's capped at 1.
+    -- This means at some point "easier" enemy types stop becoming more common, while "harder" enemy types are still increasing in frequency.
+    enemyProbs = map modifiyProbByElapsedTimeAndCap enemyProbModifiers
+    modifiyProbByElapsedTimeAndCap p = (float2Double (elapsedTime gs) / timeToHardestGameState * p) `min` 1
+    enemyProbModifiers = [basicEnemyModifier, burstEnemyModifier, coneEnemyModifier, basicSeekingEnemyModifier, fastSeekingEnemyModifier]
+
+    spawnEnemyTransforms = [
+        spawnInGameState (spawn :: IO BasicEnemy),
+        spawnInGameState (spawn :: IO BurstEnemy),
+        spawnInGameState (spawn :: IO ConeEnemy),
+        spawnInGameState (spawn :: IO BasicPlayerSeekingEnemy),
+        spawnInGameState (spawn :: IO FastPlayerSeekingEnemy)
+      ]
+
+-- Randomly determine whether to spawn a new random PowerUp.
+spawnNewPowerUp :: GameStateTransformIO
+spawnNewPowerUp gs = do p <- generateProbability
+                        if p <= spawnPowerUpOnStepProbability then spawnInGameState spawnPowerUp gs
+                        else return gs
 
 -- Combine all GameStateTransforms that occur on a time step into one, if the game is in Playing phase.
-updateOnStep :: Float -> GameStateTransform
-updateOnStep t gs@GameState{phase} = case phase of                      -- read these in reverse order, since that's the order they're applied
-                                       Playing -> gameOverIfNoLives     -- finally, transition to GameOver phase if player has lost all lives
-                                                $ despawnOutOfBounds    -- despawn all bullets and enemies which have gone out of bounds
-                                                $ takeHitsPlayer        -- and check again if the player has been hit
-                                                $ enemiesMove           -- then move the enemies
-                                                $ takeHitsPlayer        -- and if the player has been hit
-                                                $ killEnemies           -- after moving bullets, check if that killed any enemies
-                                                $ moveBullets
-                                                $ enemiesShoot
-                                                $ lowerCooldowns t
-                                                $ updateElapsedTime t gs
-                                       _ -> gs
+updateOnStep :: Float -> GameStateTransformIO
+updateOnStep t gs@GameState{phase} = case phase of
+                                       Playing -> update t gs
+                                       _ -> return gs
+  where update t' gs' = let updatedTimesGS = lowerCooldowns t
+                                           $ updateElapsedTime t gs
+                         in do spawnedPowerUpGS <- spawnNewPowerUp updatedTimesGS
+                               spawnedEnemyGS <- spawnNewEnemy spawnedPowerUpGS
+                                                              -- read these in reverse order, since that's the order they're applied
+                               return $ gameOverIfNoLives     -- finally, transition to GameOver phase if player has lost all lives
+                                      $ despawnOutOfBounds    -- despawn all bullets and enemies which have gone out of bounds
+                                      $ takeHitsPlayer        -- and check again if the player has been hit
+                                      $ enemiesMove           -- then move the enemies
+                                      $ takeHitsPlayer        -- and if the player has been hit
+                                      $ killEnemies           -- after moving bullets, check if that killed any enemies
+                                      $ moveBullets
+                                      $ enemiesShoot spawnedEnemyGS
 
+-- For all objects which can be despawned from the GameState.
 class Despawnable a where
   despawn :: [a] -> GameStateTransform
 
@@ -214,3 +253,37 @@ instance Despawnable FastPlayerSeekingEnemy where
 
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
+
+-- For all objects which can be spawned into the GameState with a random component.
+class Spawnable a where
+  spawnInGameState :: IO a -> GameStateTransformIO
+
+instance Spawnable BasicEnemy where
+  spawnInGameState s gs@GameState{enemies = (basics, bursts, cones, basicseekings, fastseekings)} =
+    do e <- s
+       return gs{enemies = (e : basics, bursts, cones, basicseekings, fastseekings)}
+
+instance Spawnable BurstEnemy where
+  spawnInGameState s gs@GameState{enemies = (basics, bursts, cones, basicseekings, fastseekings)} =
+    do e <- s
+       return gs{enemies = (basics, e : bursts, cones, basicseekings, fastseekings)}
+
+instance Spawnable ConeEnemy where
+  spawnInGameState s gs@GameState{enemies = (basics, bursts, cones, basicseekings, fastseekings)} =
+    do e <- s
+       return gs{enemies = (basics, bursts, e : cones, basicseekings, fastseekings)}
+
+instance Spawnable BasicPlayerSeekingEnemy where
+  spawnInGameState s gs@GameState{enemies = (basics, bursts, cones, basicseekings, fastseekings)} =
+    do e <- s
+       return gs{enemies = (basics, bursts, cones, e : basicseekings, fastseekings)}
+
+instance Spawnable FastPlayerSeekingEnemy where
+  spawnInGameState s gs@GameState{enemies = (basics, bursts, cones, basicseekings, fastseekings)} =
+    do e <- s
+       return gs{enemies = (basics, bursts, cones, basicseekings, e : fastseekings)}
+
+instance Spawnable PowerUp where
+  spawnInGameState s gs@GameState{powerUps} =
+    do p <- s
+       return gs{powerUps = p : powerUps}

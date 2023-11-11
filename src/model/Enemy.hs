@@ -10,9 +10,8 @@ import Model.Shooting (
     Weapon (Single, Burst, Cone),
   )
 import Model.Player
+import Model.Randomness
 import Data.Maybe
-
-import System.Random (randomRIO)
 
 -- All enemy data types. Despite seeming similar, they are separated so they can be rendered differently by the View.
 data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float} deriving Eq
@@ -44,7 +43,7 @@ class HasPosition a => Enemy a where
   -- Given an Enemy constructor (taking a position and a float for the cooldown),
   -- spawn an Enemy of that type at a random y at the right side of the screen.
   spawnEnemyType :: (Position -> Float -> a) -> IO a
-  spawnEnemyType constr = do ry <- randomRIO (screenMinY, screenMaxY)
+  spawnEnemyType constr = do ry <- randomY 0
                              let p = (screenMaxX, ry)
                              return (constr p enemyShootingCooldown)
 
