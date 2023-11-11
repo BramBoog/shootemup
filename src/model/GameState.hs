@@ -1,12 +1,11 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Model.GameState where
 
-import Model.Movement (outOfBounds)
+import Model.Movement (outOfBounds, Position)
 import Model.Player
 import Model.Enemy
 import Model.Shooting
 import Model.PowerUp
-import View.Animations
 import Data.List ((\\))
 
 data GameState = GameState {
@@ -23,7 +22,7 @@ data GameState = GameState {
   score :: Score,
   powerUps :: [PowerUp],
   animations :: [Animation]
-} deriving Show
+}
 
 data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
 type Score = Int
@@ -204,3 +203,6 @@ instance Despawnable FastPlayerSeekingEnemy where
 
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
+
+-- Data type which will be stored in a queue in gamestate for animation, the animations will be waiting to be played, each with a type and position.
+data Animation = Animation {animationType :: String, animationPos :: Position}        
