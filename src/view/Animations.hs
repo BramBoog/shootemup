@@ -11,10 +11,8 @@ import View.View
 handleAnimationQueue :: GameState -> IO GameState
 handleAnimationQueue gs@GameState{animations = []} = return gs -- Do nothing is there are no animations to be played.
 handleAnimationQueue gs@GameState{animations = (a1:as)} =
-    do case animationType a1 of -- Otherwise, playe the next animation and the rest recursively.
-        PowerUpAnimation -> animate window black (playAnimation PowerUpAnimation(animationPos a1))
-        BulletAnimation -> animate window black (playAnimation BulletAnimation  (animationPos a1))
-        _ -> animate window black (playAnimation DespawnAnimation (animationPos a1))
+    -- Otherwise, playe the next animation and the rest recursively.
+    do animate window black (playAnimation PowerUpAnimation(animationPos a1))
        handleAnimationQueue gs {animations = as}
        return gs
 
@@ -32,7 +30,7 @@ renderParticle animationType pos@(x,y) = translate x y shapeAndColourParticles
     where shapeAndColourParticles = case animationType of
             PowerUpAnimation -> color yellow $ circleSolid particleSize
             BulletAnimation -> color blue $ circleSolid (particleSize/2)
-            _ -> color red $ rectangleSolid particleSize particleSize --Despawn
+            DespawnAnimation -> color red $ rectangleSolid particleSize particleSize
 
 
 
