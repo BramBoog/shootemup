@@ -12,20 +12,29 @@ handleAnimationQueue :: GameState -> IO GameState
 handleAnimationQueue gs@GameState{animations = []} = return gs -- Do nothing is there are no animations to be played.
 handleAnimationQueue gs@GameState{animations = (a1:as)} = 
     do case animationType a1 of -- Otherwise, playe the next animation and the rest recursively.
-        powerUpAnimation -> animate window black (animatePowerUp (animationPos a1)) 
-        bulletAnimation -> animate window black (animateBullet (animationPos a1))
-        despawnAnimation -> animate window black (animateDespawn (animationPos a1))
+        powerUpAnimation -> animate window black (playAnimation "Powerup" (animationPos a1)) 
+        bulletAnimation -> animate window black (playAnimation "Bullet"  (animationPos a1))
+        despawnAnimation -> animate window black (playAnimation "Despawn" (animationPos a1))
        handleAnimationQueue gs {animations = as}
        return gs
-            
-animatePowerUp :: Position -> Float -> Picture
--- Given the animation type is powerup, this function takes the step size and starting position, and gives an updated picture each step. 
+   
+       
+playAnimation :: String -> Position -> Float -> Picture
+-- Given the animation type as a String, this function takes the step size and starting position, and gives an updated picture each step. 
 -- Animation: Four small yellow circles will move outwards from the starting position to four directions.
-animatePowerUp pos seconds = Pictures $ map renderParticle (moveParticle ToTop seconds pos : moveParticle ToBottom seconds pos : moveParticle ToRight seconds pos : moveParticle ToLeft seconds pos) -- -- Function to create next frame of animation, seconds (Float) is the time since the program started, pos is the inital position.
-    where
-         -- This function akes a position and renders a particle there.
-        renderParticle :: Position -> Picture 
-        renderParticle pos@(x,y) = translate x y $ color yellow $ circleSolid particleSize
+playAnimation animationType pos seconds = Pictures $ map (renderParticle animationType) (moveParticle ToTop seconds pos : moveParticle ToBottom seconds pos : moveParticle ToRight seconds pos : moveParticle ToLeft seconds pos) -- -- Function to create next frame of animation, seconds (Float) is the time since the program started, pos is the inital position.
+
+
+-- This function takes an animationType and position and renders a particle there.
+renderParticle :: String -> Position -> Picture 
+renderParticle animationType pos@(x,y) = translate x y shapeAndColourParticles
+-- Based on the type of animation, give the corresponding shape and colour of the particles.
+    where shapeAndColourParticles = case animationType of 
+            "Powerup" -> color yellow $ circleSolid particleSize
+            "Bullet" -> color blue $ circleSolid (particleSize/2)
+            _ -> color red $ rectangleSolid particleSize particleSize --Despawn
+
+
 
 -- Data type that tells where animated object has to move to
 data Direction = ToTop | ToBottom | ToLeft | ToRight
