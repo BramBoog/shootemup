@@ -1,5 +1,16 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Model.GameState where
+{-# LANGUAGE DeriveGeneric #-}
+module Model.GameState(
+  GameState (GameState, phase, player, enemies, bullets, score, powerUps, elapsedTime),
+  encodeFile,
+  decodeFileStrict,
+  GameStateTransform,
+  GameStateTransformIO,
+  Score,
+  GamePhase (Playing, Paused, GameOver),
+  initialState,
+  updateOnStep
+) where
 
 import Model.Movement (outOfBounds)
 import Model.Player
@@ -8,8 +19,11 @@ import Model.Shooting
 import Model.PowerUp
 import Model.Parameters
 import Model.Randomness
+
 import Data.List ((\\))
 import GHC.Float (float2Double)
+import Data.Aeson
+import GHC.Generics
 
 
 data GameState = GameState {
@@ -26,9 +40,19 @@ data GameState = GameState {
   score :: Score,
   powerUps :: [PowerUp],
   elapsedTime :: Float
-} deriving Show
+} deriving (Generic, Show)
 
-data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
+instance ToJSON GameState where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON GameState where
+
+data GamePhase = Playing | Paused | GameOver deriving (Eq, Show, Generic)
+
+instance ToJSON GamePhase where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON GamePhase where
+
+
 type Score = Int
 type GameStateTransform   = GameState -> GameState
 type GameStateTransformIO = GameState -> IO GameState
@@ -178,7 +202,6 @@ gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = Ga
 spawnNewEnemy :: GameStateTransformIO
 spawnNewEnemy gs = do p <- generateProbability
                       if p <= spawnEnemyOnStepProbability then do r <- generateProbability
-                                                                  print enemyProbs
                                                                   spawnTransform <- chooseWithProb enemyProbDist
                                                                   spawnTransform gs
                       else return gs

@@ -1,5 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model.Enemy where
 
 import Model.Movement (Position, Vector, move, HasPosition (pos, hit))
@@ -11,14 +13,17 @@ import Model.Shooting (
   )
 import Model.Player
 import Model.Randomness
+
 import Data.Maybe
+import Data.Aeson
+import GHC.Generics
 
 -- All enemy data types. Despite seeming similar, they are separated so they can be rendered differently by the View.
-data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float} deriving Eq
-data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float} deriving Eq
-data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float} deriving Eq
-data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float} deriving Eq
-data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} deriving Eq
+data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: Float} deriving (Eq, Show, Generic)
+data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float} deriving (Eq, Show, Generic)
+data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float} deriving (Eq, Show, Generic)
+data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float} deriving (Eq, Show, Generic)
+data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} deriving (Eq, Show, Generic)
 
 instance HasPosition BasicEnemy where
   pos = basicEnemyPos
@@ -139,19 +144,21 @@ instance CanShoot BasicPlayerSeekingEnemy where
   lowerCooldown t p@BasicPlayerSeekingEnemy{basicSeekingCooldown} = p{basicSeekingCooldown = basicSeekingCooldown - t}
   resetCooldown p@BasicPlayerSeekingEnemy{basicSeekingCooldown} = p{basicSeekingCooldown = enemyShootingCooldown}
   weapon _ = Single
-  
--- Show is used to in a dictionary in View to return a picture for each renderable data type.
-instance Show BasicEnemy where
-        show basicEnemy = "BasicEnemy"
 
-instance Show BurstEnemy where 
-        show burstEnemy = "BurstEnemy"  
+-- Provide empty instances to let the compiler generate default implementations.
+instance ToJSON BasicEnemy where
+  toEncoding = genericToEncoding defaultOptions
+instance ToJSON BurstEnemy where
+  toEncoding = genericToEncoding defaultOptions
+instance ToJSON ConeEnemy where
+  toEncoding = genericToEncoding defaultOptions
+instance ToJSON BasicPlayerSeekingEnemy where
+  toEncoding = genericToEncoding defaultOptions
+instance ToJSON FastPlayerSeekingEnemy where
+  toEncoding = genericToEncoding defaultOptions
 
-instance Show ConeEnemy where 
-        show coneEnemy = "ConeEnemy"   
-
-instance Show BasicPlayerSeekingEnemy where 
-        show basicPlayerSeekingEnemy = "BasicPlayerSeekingEnemy"   
-
-instance Show FastPlayerSeekingEnemy where 
-        show fastPlayerSeekingEnemy = "FastPlayerSeekingEnemy"  
+instance FromJSON BasicEnemy where
+instance FromJSON BurstEnemy where
+instance FromJSON ConeEnemy where
+instance FromJSON BasicPlayerSeekingEnemy where
+instance FromJSON FastPlayerSeekingEnemy where

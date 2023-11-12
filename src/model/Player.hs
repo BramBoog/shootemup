@@ -1,4 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model.Player where
 
 import Model.Movement (Position, Vector, HasPosition (pos, hit), move)
@@ -8,7 +10,11 @@ import Model.Shooting (
     Weapon,
     CanShoot (cooldown, lowerCooldown, resetCooldown, weapon, shootsRightward)
   )
+
 import Data.Maybe (mapMaybe)
+import Data.Aeson
+import GHC.Generics
+
 
 data Player = Player {
   playerPos :: Position,
@@ -16,10 +22,7 @@ data Player = Player {
   playerWeapon :: Weapon,
   lives :: Int,
   playerCooldown :: Float
-}
-
-instance Show Player where
-  show player = "Player"
+} deriving (Generic, Show)
 
 instance HasPosition Player where
   pos = playerPos
@@ -30,6 +33,10 @@ instance CanShoot Player where
   lowerCooldown t p@Player{playerCooldown} = p{playerCooldown = playerCooldown - t}
   resetCooldown p@Player{playerCooldown} = p{playerCooldown = playerShootingCooldown}
   weapon = playerWeapon
+
+instance ToJSON Player where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON Player where
 
 -- player only moves in y, cannot move beyond max and min y
 movePlayer :: Player -> Float -> Player

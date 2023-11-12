@@ -1,4 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model.Shooting (
   CanShoot (cooldown, lowerCooldown, weapon, shootsRightward, shoot, resetCooldown, allShoot),
   Bullet (Bullet, bulletPos, bulletVector),
@@ -14,6 +16,10 @@ import Model.Movement (
     pos
   )
 import Model.Parameters
+
+import Data.Aeson
+import GHC.Generics
+
 
 class HasPosition a => CanShoot a where
   shootsRightward :: a -> Bool
@@ -58,15 +64,21 @@ class HasPosition a => CanShoot a where
   allShoot as = let tups = map shoot as
                 in (map fst tups, concatMap snd tups)
 
-data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector} deriving Eq
+data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector} deriving (Eq, Show, Generic)
 
 instance HasPosition Bullet where
   pos = bulletPos
 
-instance Show Bullet where
-  show bullet = "Bullet"
+instance ToJSON Bullet where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON Bullet where
 
 moveBullet :: Bullet -> Bullet
 moveBullet b@Bullet {bulletPos, bulletVector} = b {bulletPos = move bulletPos bulletVector}
 
-data Weapon = Single | Burst | Cone deriving Show
+data Weapon = Single | Burst | Cone deriving (Show, Generic)
+
+instance ToJSON Weapon where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON Weapon where
+

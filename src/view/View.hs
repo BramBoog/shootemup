@@ -1,38 +1,51 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module View.View where
 
-import Model.GameState
+import Model.GameState (GameState (GameState, player, enemies, bullets, powerUps))
 import Model.Parameters
+import Model.Player
+import Model.PowerUp
 import Model.Movement
+import Model.Shooting (Bullet)
+import Model.Enemy
+
 import GHC.Float (float2Int)
 import qualified Data.Map as Map
 import Graphics.Gloss
 
-
 window :: Display
 window = InWindow "Shoot 'Em Up" (2 * float2Int screenSizeX, 2 * float2Int screenSizeY) (0, 0)
 
--- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
-render :: Show gameObject => Map.Map String Picture -> gameObject -> Picture
-render assetNameToPicture gameObject = Map.findWithDefault defaultCircle (show gameObject) assetNameToPicture
--- If the key is not present in the dictionary, show a default circle.
-    where 
-        defaultCircle = circle defaultCircleSize
-        defaultCircleSize = 30
 
--- Given a string refering to a data type, this function returns a corresponding picture for that data type.
-asssetNameToPicture :: Map.Map String Picture
-asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemySize)),
-                                    ("BurstEnemy", color chartreuse (circleSolid enemySize)),
-                                    ("ConeEnemy", color yellow (circleSolid enemySize)),
-                                    ("BasicPlayerSeekingEnemy", color rose (circleSolid enemySize)),
-                                    ("FastPlayerSeekingEnemy", color violet (circleSolid enemySize)),
-                                    ("Player", color blue (rectangleSolid playerSize playerSize)),
-                                    ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
-                                    ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
-                                    ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
-                                    ("Bullet", color white (rectangleSolid bulletSizeX bulletSizeY))
-                                   ]
+-- Defines a Picture for each object
+class Renderable a where
+    toPicture :: a -> Picture
+
+instance Renderable Player where
+    toPicture _ = color blue (rectangleSolid playerSize playerSize)
+
+instance Renderable PowerUp where
+    toPicture (BurstFire _) = color chartreuse (thickCircle powerupSize lineWidth)
+    toPicture (ConeFire _) = color yellow (thickCircle powerupSize lineWidth)
+    toPicture (SpeedBoost _) = color azure (thickCircle powerupSize lineWidth)
+
+instance Renderable Bullet where
+    toPicture _ = color white (rectangleSolid bulletSizeX bulletSizeY)
+
+instance Renderable BasicEnemy where
+    toPicture _ = color red (circleSolid enemySize)
+
+instance Renderable BurstEnemy where
+    toPicture _ = color chartreuse (circleSolid enemySize)
+
+instance Renderable ConeEnemy where
+    toPicture _ = color yellow (circleSolid enemySize)
+
+instance Renderable BasicPlayerSeekingEnemy where
+    toPicture _ = color rose (circleSolid enemySize)
+
+instance Renderable FastPlayerSeekingEnemy where
+    toPicture _ = color violet (circleSolid enemySize)
 
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
@@ -43,9 +56,9 @@ translatePicture picture gameObject = translate x y picture
 
 
 --Given a gameObject, return the right picture on the correct place.
-givePicture :: (HasPosition gameObject, Show gameObject) => gameObject -> Picture
+givePicture :: (HasPosition gameObject, Renderable gameObject) => gameObject -> Picture
 givePicture gameObject = translatePicture renderedGameObject gameObject
-    where renderedGameObject = render asssetNameToPicture gameObject
+    where renderedGameObject = toPicture gameObject
 
 
 -- Return all the pictures of the entire gamestate.
