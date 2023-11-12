@@ -6,6 +6,7 @@ import View.Window
 import Model.GameState (initialState)
 
 import Graphics.Gloss.Interface.IO.Game
+import Graphics.Gloss.Interface.IO.Animate (animateIO)
 
 main :: IO ()
 main = playIO window

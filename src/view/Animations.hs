@@ -13,7 +13,7 @@ data AnimationType = PowerUpAnimation | BulletAnimation | DespawnAnimation
 
 playAnimation :: AnimationType -> Position -> Float -> Picture
 -- Given the animation type, this function takes the step size and starting position, and gives an updated picture each step. 
--- Animation: Four small yellow circles will move outwards from the starting position to four directions.
+-- Animation: Four small shapes will move outwards from the starting position to four directions.
 playAnimation animationType pos seconds = Pictures $ map (renderParticle animationType) [moveParticle ToTop seconds pos, moveParticle ToBottom seconds pos, moveParticle ToRight seconds pos, moveParticle ToLeft seconds pos] -- Function to create next frame of animation, seconds (Float) is the time since the program started, pos is the inital position.
 
 
