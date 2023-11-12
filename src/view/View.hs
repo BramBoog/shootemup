@@ -9,7 +9,7 @@ import qualified Data.Map as Map
 import Graphics.Gloss
 import Model.Player
 import View.Animations
-
+import Data.List ((\\))
 
 -- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
 render :: Show gameObject => Map.Map String Picture -> gameObject -> Picture
@@ -59,16 +59,27 @@ pictureLivesAndScore gs@GameState{player = player, score = score} = Pictures [sc
 -- Given the gamestate with the animationqueue, return the current animation frames based on the difference between AnimationStart and elapsedTime.
 renderAnimations :: GameState -> Picture
 renderAnimations gs@GameState{animations} = Pictures $ map renderOneAnimation animations
-    where 
+    where
         renderOneAnimation :: Animation -> Picture
-        renderOneAnimation animation | difference < animationLength = renderParticles animation relativeFactor difference -- During the animation, show the particles at the right place.
-                                     | otherwise                    = Blank --If the animationLength has passed, show nothing.
-            where 
+        renderOneAnimation animation = renderParticles animation relativeFactor difference -- During the animation, show the particles at the right place.
+                                     
+            where
                 startingTime = animationStart animation
                 currentTime = elapsedTime gs
                 difference = currentTime - startingTime
                 -- This factor shows how far in the animation we are.
                 relativeFactor = animationSize * currentTime / animationLength
+
+                
+-- Remove an animation from the queue if its over.
+removeAnimations :: GameStateTransform
+removeAnimations gs@GameState{animations} = gs {animations = animations \\ removedAnimations}
+    where
+        removedAnimations = filter isAnimationOver animations
+        currentTime = elapsedTime gs
+        startingTime a = animationStart a
+        isAnimationOver a = currentTime - startingTime a < animationLength
+
 
 -- This function takes an animation and renders a particle there, where the position is based on the difference between elaspedTime and animationStart.
 renderParticles :: Animation -> Float -> Float -> Picture
