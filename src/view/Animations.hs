@@ -1,20 +1,14 @@
 module View.Animations where
 
 import Graphics.Gloss
-import Model.Movement
-import Model.GameState
-import View.View
+import Model.Movement (Position, Direction (ToTop, ToBottom, ToLeft, ToRight))
 
 -- This module contains animations which play when certain events happen.
 
--- Take the animations from the queue and play the right type of animation at the right position.
-handleAnimationQueue :: GameState -> IO GameState
-handleAnimationQueue gs@GameState{animations = []} = return gs -- Do nothing is there are no animations to be played.
-handleAnimationQueue gs@GameState{animations = (a1:as)} =
-    -- Otherwise, playe the next animation and the rest recursively.
-    do animate window black (playAnimation PowerUpAnimation(animationPos a1))
-       handleAnimationQueue gs {animations = as}
-       return gs
+-- Data type which will be stored in a queue in gamestate for animation, the animations will be waiting to be played, each with a type and position.
+data Animation = Animation {animationType :: AnimationType, animationPos :: Position}
+-- Depending on the animationType, different particles will be used for the animation.    
+data AnimationType = PowerUpAnimation | BulletAnimation | DespawnAnimation
 
 
 playAnimation :: AnimationType -> Position -> Float -> Picture
@@ -31,11 +25,6 @@ renderParticle animationType pos@(x,y) = translate x y shapeAndColourParticles
             PowerUpAnimation -> color yellow $ circleSolid particleSize
             BulletAnimation -> color blue $ circleSolid (particleSize/2)
             DespawnAnimation -> color red $ rectangleSolid particleSize particleSize
-
-
-
--- Data type that tells where animated object has to move to
-data Direction = ToTop | ToBottom | ToLeft | ToRight
 
 moveParticle :: Direction -> Float -> Position -> Position
 -- This function updates the position of a particle, given a Direction that tells where the particle has to move to. d is the size of a step in this movement.

@@ -1,8 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Model.Player where
 
-import Model.Movement (Position, Vector, HasPosition (pos, hit), move)
-import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown)
+import Model.Movement (Position, Vector, HasPosition (pos, hit), move, Direction (ToTop, ToBottom))
+import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown, playerNormalVerticalSpeed, playerBoostedVerticalSpeed)
 import Model.Shooting (
     Bullet,
     Weapon,
@@ -12,11 +12,13 @@ import Data.Maybe (mapMaybe)
 
 data Player = Player {
   playerPos :: Position,
-  speed :: Float,
+  speed :: PlayerSpeed,
   playerWeapon :: Weapon,
   lives :: Int,
   playerCooldown :: Float
 }
+
+data PlayerSpeed = Normal | Boosted
 
 instance Show Player where
   show player = "Player"
@@ -32,11 +34,16 @@ instance CanShoot Player where
   weapon = playerWeapon
 
 -- player only moves in y, cannot move beyond max and min y
-movePlayer :: Player -> Float -> Player
-movePlayer pl dy = let p = playerPos pl
-                       s = speed pl
-                       (x, y) = move p (0, dy * s)
-                    in pl {playerPos = (x, min (max y screenMinY) screenMaxY)}
+movePlayer :: Direction -> Player -> Player
+movePlayer d pl@Player{playerPos, speed} = let dy = case speed of
+                                                      Normal -> playerNormalVerticalSpeed
+                                                      Boosted -> playerBoostedVerticalSpeed
+                                               sign = case d of
+                                                        ToTop -> 1
+                                                        ToBottom -> -1
+                                                        _ -> error "Player can only move up or down."
+                                               (x, y) = move playerPos (0, sign * dy)
+                                            in pl{playerPos = (x, min (max y screenMinY) screenMaxY)}
 
 -- For a list of objects of a certain type, obtain all objects which have hit the player
 hitsOnPlayer :: HasPosition a => Player -> [a] -> [a]

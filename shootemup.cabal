@@ -16,6 +16,7 @@ library
                     Model.PowerUp,
                     View.View,
                     View.Animations,
+                    View.Window,
                     Controller.Controller
 
   -- Modules included in this library but not exported.

@@ -3,6 +3,7 @@ module Model.Movement (
   Vector,
   move,
   HasPosition (pos, hit, outOfBounds),
+  Direction (ToTop, ToBottom, ToRight, ToLeft)
 ) where
 
 import Model.Parameters (screenMinX, screenMaxX, screenMinY, screenMaxY)
@@ -24,3 +25,6 @@ class HasPosition a where
   hit :: HasPosition b => a -> b -> Maybe (a, b)
   hit a b | pos a == pos b = Just (a, b) -- Change to this later: if the position is approximately equal.
           | otherwise = Nothing
+
+-- Enumeration of all directions along the x and y axes
+data Direction = ToTop | ToBottom | ToLeft | ToRight

@@ -8,6 +8,10 @@ import Model.Shooting
 import Model.PowerUp
 import Model.Parameters
 import Model.Randomness
+import View.Window
+import View.Animations
+
+import Graphics.Gloss
 import Data.List ((\\))
 import GHC.Float (float2Double)
 
@@ -27,7 +31,7 @@ data GameState = GameState {
   powerUps :: [PowerUp],
   animations :: [Animation],
   elapsedTime :: Float
-} deriving Show
+}
 
 data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
 type Score = Int
@@ -46,7 +50,7 @@ initialState = GameState {
   elapsedTime = 0
 }
   where 
-    initialPlayer = Player {playerPos = (playerX, 0), speed = playerNormalVerticalSpeed, playerWeapon = Single, lives = 10, playerCooldown = 5}
+    initialPlayer = Player {playerPos = (playerX, 0), speed = Normal, playerWeapon = Single, lives = 10, playerCooldown = 5}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (playerX, -200)}]
 
@@ -180,7 +184,6 @@ gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = Ga
 spawnNewEnemy :: GameStateTransformIO
 spawnNewEnemy gs = do p <- generateProbability
                       if p <= spawnEnemyOnStepProbability then do r <- generateProbability
-                                                                  print enemyProbs
                                                                   spawnTransform <- chooseWithProb enemyProbDist
                                                                   spawnTransform gs
                       else return gs
@@ -209,24 +212,38 @@ spawnNewPowerUp gs = do p <- generateProbability
                         if p <= spawnPowerUpOnStepProbability then spawnInGameState spawnPowerUp gs
                         else return gs
 
+-- Take the animations from the queue and play the right type of animation at the right position.
+handleAnimationQueue :: GameStateTransformIO
+handleAnimationQueue gs@GameState{animations = []} = return gs -- Do nothing is there are no animations to be played.
+handleAnimationQueue gs@GameState{animations = (a1:as)} =
+    -- Otherwise, playe the next animation and the rest recursively.
+    do animate window black (playAnimation PowerUpAnimation(animationPos a1))
+       handleAnimationQueue gs {animations = as}
+       return gs
+
+
 -- Combine all GameStateTransforms that occur on a time step into one, if the game is in Playing phase.
 updateOnStep :: Float -> GameStateTransformIO
 updateOnStep t gs@GameState{phase} = case phase of
-                                       Playing -> update t gs
+                                       Playing -> update
                                        _ -> return gs
-  where update t' gs' = let updatedTimesGS = lowerCooldowns t
-                                           $ updateElapsedTime t gs
-                         in do spawnedPowerUpGS <- spawnNewPowerUp updatedTimesGS
-                               spawnedEnemyGS <- spawnNewEnemy spawnedPowerUpGS
-                                                              -- read these in reverse order, since that's the order they're applied
-                               return $ gameOverIfNoLives     -- finally, transition to GameOver phase if player has lost all lives
-                                      $ despawnOutOfBounds    -- despawn all bullets and enemies which have gone out of bounds
-                                      $ takeHitsPlayer        -- and check again if the player has been hit
-                                      $ enemiesMove           -- then move the enemies
-                                      $ takeHitsPlayer        -- and if the player has been hit
-                                      $ killEnemies           -- after moving bullets, check if that killed any enemies
-                                      $ moveBullets
-                                      $ enemiesShoot spawnedEnemyGS
+  where update = let updatedTimesGS = updateTimes gs              -- first update the times in the gamestate
+                  in do spawnedNewGS <- spawnedNew updatedTimesGS -- then optionally spawn a new enemy and powerup
+
+                                                                  -- read these in reverse, since that's the order they're applied
+                        return $ gameOverIfNoLives                -- finally, transition to GameOver phase if player has lost all lives
+                               $ despawnOutOfBounds               -- despawn all bullets and enemies which have gone out of bounds
+                               $ takeHitsPlayer                   -- and check again if the player has been hit
+                               $ enemiesMove                      -- then move the enemies
+                               $ takeHitsPlayer                   -- having moved the bullets, check if the player has been hit
+                               $ killEnemies                      -- after moving bullets, check if that killed any enemies
+                               $ moveBullets
+                               $ enemiesShoot spawnedNewGS
+                                        
+        updateTimes = lowerCooldowns t
+                    . updateElapsedTime t
+        spawnedNew gs' = do spawnedPowerUpGS <- spawnNewPowerUp gs'
+                            spawnNewEnemy spawnedPowerUpGS
 
 -- For all objects which can be despawned from the GameState.
 class Despawnable a where
@@ -253,20 +270,12 @@ instance Despawnable FastPlayerSeekingEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
                   in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es), animations = despawnAnimations es ++ animations gs}
 
---Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
-despawnAnimations :: (Despawnable a, HasPosition a) => [a] -> [Animation]
-despawnAnimations es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e}) es
-
-
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
 
-  
--- Data type which will be stored in a queue in gamestate for animation, the animations will be waiting to be played, each with a type and position.
-data Animation = Animation {animationType :: AnimationType, animationPos :: Position}
--- Depending on the animationType, different particles will be used for the animation.    
-data AnimationType = PowerUpAnimation | BulletAnimation | DespawnAnimation
-
+--Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
+despawnAnimations :: (Despawnable a, HasPosition a) => [a] -> [Animation]
+despawnAnimations es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e}) es
 
 -- For all objects which can be spawned into the GameState with a random component.
 class Spawnable a where

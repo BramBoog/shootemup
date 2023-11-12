@@ -4,9 +4,11 @@ module Controller.Controller where
 import Model.GameState
 import Model.Player (movePlayer)
 import Model.Shooting
+import Model.Movement (HasPosition (pos), Direction (ToTop, ToBottom))
+import View.Animations
+
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
-import Model.Movement
 
 step :: Float -> GameStateTransformIO
 step = updateOnStep
@@ -19,8 +21,8 @@ keyboardInputHandler :: Event -> GameState -> GameState
 keyboardInputHandler (EventKey pressedButton _ _ _) gameState@GameState{player, bullets, animations}  = case phase gameState of
   -- If the gamephase is 'playing', the following input is considered:
   Playing -> case pressedButton of
-    SpecialKey KeyUp -> gameState {player =  movePlayer player verticalMovementStep} -- Move the player upwards.
-    SpecialKey KeyDown -> gameState {player = movePlayer player ((-1) * verticalMovementStep)} -- Move the player downwards.
+    SpecialKey KeyUp -> gameState {player = movePlayer ToTop player} -- Move the player upwards.
+    SpecialKey KeyDown -> gameState {player = movePlayer ToBottom player} -- Move the player downwards.
     Char 'r' -> initialState -- Reset the gamestate to the initalGamestate by pressing r.
     Char 's' -> let (updatedPlayer, newBulletList) = shoot player
                     newAnimation = Animation {animationType = BulletAnimation, animationPos = pos player} -- Add the bullet animation to the animationQueue.
@@ -40,6 +42,3 @@ keyboardInputHandler (EventKey pressedButton _ _ _) gameState@GameState{player, 
 
 -- Nothing happens if any other type of keyboard event is triggered.
 keyboardInputHandler _ gameState = gameState
-
-
-verticalMovementStep = 5.0 -- Amount of vertical movement of player based on input.

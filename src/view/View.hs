@@ -4,13 +4,10 @@ module View.View where
 import Model.GameState
 import Model.Parameters
 import Model.Movement
-import GHC.Float (float2Int)
+import View.Window
 import qualified Data.Map as Map
 import Graphics.Gloss
 
-
-window :: Display
-window = InWindow "Shoot 'Em Up" (2 * float2Int screenSizeX, 2 * float2Int screenSizeY) (0, 0)
 
 -- Take an asset and use an - asset name to picture - mapping function to return a picture. All renderable objects are instances of the Show class.
 render :: Show gameObject => Map.Map String Picture -> gameObject -> Picture

@@ -2,6 +2,7 @@ module Main where
 
 import Controller.Controller
 import View.View
+import View.Window
 import Model.GameState (initialState)
 
 import Graphics.Gloss.Interface.IO.Game
