@@ -2,7 +2,7 @@
 module View.View where
 
 import Model.GameState
-import Model.Parameters
+import Model.Parameters(bulletSize, enemySize, lineWidth, playerSize, powerupSize, screenSizeX, screenSizeY)
 import Model.Movement
 import GHC.Float (float2Int)
 import qualified Data.Map as Map
@@ -31,9 +31,8 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
                                     ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
                                     ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
                                     ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
-                                    ("Bullet", color white (rectangleSolid bulletSizeX bulletSizeY))
+                                    ("Bullet", color white (rectangleSolid bulletSize bulletSize))
                                    ]
-
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture
