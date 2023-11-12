@@ -3,6 +3,7 @@ module Model.Movement (
   Vector,
   move,
   HasPosition (pos, hit, outOfBounds),
+  Direction (ToTop, ToBottom, ToRight, ToLeft)
 ) where
 
 import Model.Parameters (screenMinX, screenMaxX, screenMinY, screenMaxY, enemySize, playerSize, powerupSize, bulletSize)
@@ -56,6 +57,9 @@ class Show a => HasPosition a where
   hitboxesIntersect a b = any (`pointInHitbox` h1) (corners h2) || any (`pointInHitbox` h2) (corners h1)
       where
         (h1, h2) = (hitbox a, hitbox b)
+
+-- Enumeration of all directions along the x and y axes
+data Direction = ToTop | ToBottom | ToLeft | ToRight
 
 -- Return a list with all the corners of a square.  
 corners :: Square -> [Position]

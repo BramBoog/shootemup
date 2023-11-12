@@ -20,8 +20,8 @@ fastEnemyHorizontalSpeed = 3
 fastEnemyVerticalSpeed = 1.5
 
 playerNormalVerticalSpeed, playerBoostedVerticalSpeed :: Float
-playerNormalVerticalSpeed = 1
-playerBoostedVerticalSpeed = 1.5
+playerNormalVerticalSpeed = 2
+playerBoostedVerticalSpeed = 3
 
 bulletHorizontalSpeed, bulletVerticalSpeed :: Float
 bulletHorizontalSpeed = 4
@@ -46,6 +46,8 @@ enemyShootingCooldown, playerShootingCooldown :: Float
 enemyShootingCooldown = 4
 playerShootingCooldown = 3
 
+powerUpDuration :: Float
+powerUpDuration = 2
 
 -- Spawning probabilities
 

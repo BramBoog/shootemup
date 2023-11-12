@@ -44,7 +44,7 @@ initialState = GameState {
   elapsedTime = 0
 }
   where 
-    initialPlayer = Player {playerPos = (playerX, 0), speed = playerNormalVerticalSpeed, playerWeapon = Single, lives = 10, playerCooldown = 5}
+    initialPlayer = Player {playerPos = (playerX, 0), speed = Normal, playerWeapon = Single, lives = 10, playerCooldown = 5, weaponPowerUpTimer = Nothing, speedBoostPowerUpTimer = Nothing}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (playerX, -200)}]
 
@@ -109,7 +109,7 @@ killEnemies gs@GameState{
       $ despawn fastSeekingHit
       $ despawn allBulletsHit gs
 
--- Lowers the shooting cooldowns by the elapsed time for the player an all enemies types that can shoot.
+-- Lowers the shooting cooldowns by the elapsed time for the player and all enemies types that can shoot.
 lowerCooldowns :: Float -> GameStateTransform
 lowerCooldowns t gs@GameState{
   player,
@@ -122,6 +122,9 @@ lowerCooldowns t gs@GameState{
        player = lowerCooldown t player,
        enemies = (basicLowered, burstLowered, coneLowered, seekingLowered, fastPlayerSeekingEnemies)
      }
+
+lowerPlayerPowerUpTimers :: Float -> GameStateTransform
+lowerPlayerPowerUpTimers t gs@GameState{player} = gs{player = lowerPowerUpTimers t player}
 
 -- Let all enemies shoot, if their cooldown allows. Add the new enemies (with reset cooldowns) and newly generated bullets to the new GameState
 enemiesShoot :: GameStateTransform
@@ -170,6 +173,12 @@ takeHitsPlayer gs@GameState{
        subtractLives :: Int -> GameStateTransform
        subtractLives x gs@GameState{player} = gs{player = player {lives = lives player - x}}
 
+-- Have the player pick up all powerUps it's come into contact with, and despawn those powerUps from the GameState.
+addPowerUpsToPlayer :: GameStateTransform
+addPowerUpsToPlayer gs@GameState{player, powerUps} = let powerUpsHit = hitsOnPlayer player powerUps
+                                                         newPlayer = foldr pickUpPowerUp player powerUpsHit
+                                                      in despawn powerUpsHit gs{player = newPlayer}
+
 gameOverIfNoLives :: GameStateTransform
 gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = GameOver}
                                          else gs
@@ -178,7 +187,6 @@ gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = Ga
 spawnNewEnemy :: GameStateTransformIO
 spawnNewEnemy gs = do p <- generateProbability
                       if p <= spawnEnemyOnStepProbability then do r <- generateProbability
-                                                                  print enemyProbs
                                                                   spawnTransform <- chooseWithProb enemyProbDist
                                                                   spawnTransform gs
                       else return gs
@@ -212,8 +220,9 @@ updateOnStep :: Float -> GameStateTransformIO
 updateOnStep t gs@GameState{phase} = case phase of
                                        Playing -> update t gs
                                        _ -> return gs
-  where update t' gs' = let updatedTimesGS = lowerCooldowns t
-                                           $ updateElapsedTime t gs
+  where update t' gs' = let updatedTimesGS = lowerPlayerPowerUpTimers t'
+                                           $ lowerCooldowns t'
+                                           $ updateElapsedTime t' gs'
                          in do spawnedPowerUpGS <- spawnNewPowerUp updatedTimesGS
                                spawnedEnemyGS <- spawnNewEnemy spawnedPowerUpGS
                                                               -- read these in reverse order, since that's the order they're applied
@@ -224,7 +233,8 @@ updateOnStep t gs@GameState{phase} = case phase of
                                       $ takeHitsPlayer        -- and if the player has been hit
                                       $ killEnemies           -- after moving bullets, check if that killed any enemies
                                       $ moveBullets
-                                      $ enemiesShoot spawnedEnemyGS
+                                      $ enemiesShoot 
+                                      $ addPowerUpsToPlayer spawnedEnemyGS
 
 -- For all objects which can be despawned from the GameState.
 class Despawnable a where
@@ -253,6 +263,9 @@ instance Despawnable FastPlayerSeekingEnemy where
 
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
+
+instance Despawnable PowerUp where
+  despawn ps gs = gs {powerUps = powerUps gs \\ ps}
 
 -- For all objects which can be spawned into the GameState with a random component.
 class Spawnable a where

@@ -4,6 +4,7 @@ module Controller.Controller where
 import Model.GameState
 import Model.Player (movePlayer)
 import Model.Shooting
+import Model.Movement (HasPosition (pos), Direction (ToTop, ToBottom))
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 
@@ -18,8 +19,8 @@ keyboardInputHandler :: Event -> GameState -> GameState
 keyboardInputHandler (EventKey pressedButton _ _ _) gameState@GameState{player, bullets}  = case phase gameState of
   -- If the gamephase is 'playing', the following input is considered:
   Playing -> case pressedButton of
-    SpecialKey KeyUp -> gameState {player =  movePlayer player verticalMovementStep} -- Move the player upwards.
-    SpecialKey KeyDown -> gameState {player = movePlayer player ((-1) * verticalMovementStep)} -- Move the player downwards.
+    SpecialKey KeyUp -> gameState {player =  movePlayer ToTop player} -- Move the player upwards.
+    SpecialKey KeyDown -> gameState {player = movePlayer ToBottom player} -- Move the player downwards.
     Char 'r' -> initialState -- Reset the gamestate to the initalGamestate by pressing r.
     Char 's' -> let (updatedPlayer, newBulletList) = shoot player in gameState {player = updatedPlayer, bullets = bullets ++ newBulletList} -- Shoot when 's' is pressed, update the player cooldown and the current bullet list of the gamestate with the new bullet(s).
     Char 'p' -> gameState {phase =  Paused} -- Pause the game.
