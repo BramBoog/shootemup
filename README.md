@@ -4,7 +4,7 @@
 
 The game can be started from the project directory using the command line.
 
-The follwing command starts the game from a predefined initial state:
+The following command starts the game from a predefined initial state:
 
 ```cabal run shootemup```
 
@@ -19,9 +19,9 @@ The game will open in a new screen and be ready to play!
 
 - Press `s` to shoot.
 - Use the up and down arrow keys to move up or down.
-- Press `p` to pause the game (you will see everyting stop moving onscreen). Press again to unpause.
+- Press `p` to pause the game (you will see everything stop moving onscreen). Press again to unpause.
 - Press `r` to reset the game to the predefined initial state.
-- Press `q` to save the game state to a file.
+- Press `q` to save the game state to a file when the game is paused.
 
 ## Playing the game
 
