@@ -12,7 +12,7 @@ import GHC.Generics
 
 data PowerUp = BurstFire {burstFirePos :: Position}
               | ConeFire {coneFirePos :: Position}
-              | SpeedBoost {speedBoostPos :: Position} deriving (Generic, Show)
+              | SpeedBoost {speedBoostPos :: Position} deriving (Generic, Eq, Show)
             
 instance HasPosition PowerUp where
   pos BurstFire {burstFirePos} = burstFirePos

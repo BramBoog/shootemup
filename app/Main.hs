@@ -3,7 +3,8 @@ module Main where
 import Controller.Controller
 import Controller.FileSystem
 import View.View
-import Model.GameState (initialState)
+import View.Window
+import Model.GameState (initialState, updateOnStep)
 
 import Graphics.Gloss.Interface.IO.Game
 import System.Environment
@@ -21,4 +22,4 @@ main = do args <- getArgs
                       initState
                       view
                       keyboardInputHandler
-                      step
+                      updateOnStep
