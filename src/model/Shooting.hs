@@ -13,7 +13,8 @@ import Model.Movement (
     Vector,
     HasPosition,
     move,
-    pos
+    pos,
+    hitboxSize
   )
 import Model.Parameters
 
@@ -68,6 +69,7 @@ data Bullet = Bullet {bulletPos :: Position, bulletVector :: Vector} deriving (E
 
 instance HasPosition Bullet where
   pos = bulletPos
+  hitboxSize _ = bulletSize
 
 instance ToJSON Bullet where
   toEncoding = genericToEncoding defaultOptions

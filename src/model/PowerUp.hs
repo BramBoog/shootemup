@@ -3,7 +3,7 @@
 
 module Model.PowerUp where
 
-import Model.Movement (Position, HasPosition (pos))
+import Model.Movement (Position, HasPosition (pos, hitboxSize))
 import Model.Randomness
 import Model.Parameters
 
@@ -18,6 +18,8 @@ instance HasPosition PowerUp where
   pos BurstFire {burstFirePos} = burstFirePos
   pos ConeFire {coneFirePos} = coneFirePos
   pos SpeedBoost {speedBoostPos} = speedBoostPos
+
+  hitboxSize _ = powerupSize
 
 instance ToJSON PowerUp where
   toEncoding = genericToEncoding defaultOptions

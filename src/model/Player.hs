@@ -3,8 +3,8 @@
 
 module Model.Player where
 
-import Model.Movement (Position, Vector, HasPosition (pos, hit), move)
-import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown)
+import Model.Movement (Position, Vector, HasPosition (pos, hitboxSize, hit), move)
+import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown, playerSize)
 import Model.Shooting (
     Bullet,
     Weapon,
@@ -26,6 +26,7 @@ data Player = Player {
 
 instance HasPosition Player where
   pos = playerPos
+  hitboxSize _ = playerSize
 
 instance CanShoot Player where
   shootsRightward _ = True

@@ -4,7 +4,7 @@
 
 module Model.Enemy where
 
-import Model.Movement (Position, Vector, move, HasPosition (pos, hit))
+import Model.Movement (Position, Vector, move, hitboxSize, HasPosition (pos, hit))
 import Model.Parameters
 import Model.Shooting (
     CanShoot (cooldown, lowerCooldown, resetCooldown, weapon, shootsRightward),
@@ -27,18 +27,23 @@ data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position
 
 instance HasPosition BasicEnemy where
   pos = basicEnemyPos
+  hitboxSize _ = enemySize
 
 instance HasPosition BurstEnemy where
   pos = burstEnemyPos
+  hitboxSize _ = enemySize
 
 instance HasPosition ConeEnemy where
   pos = coneEnemyPos
+  hitboxSize _ = enemySize
 
 instance HasPosition BasicPlayerSeekingEnemy where
   pos = basicSeekingPos
+  hitboxSize _ = enemySize
 
 instance HasPosition FastPlayerSeekingEnemy where
   pos = fastSeekingPos
+  hitboxSize _ = enemySize
 
 -- All enemies are instances of this class.
 class HasPosition a => Enemy a where 

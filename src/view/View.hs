@@ -2,7 +2,7 @@
 module View.View where
 
 import Model.GameState (GameState (GameState, player, enemies, bullets, powerUps))
-import Model.Parameters
+import Model.Parameters (bulletSize, enemySize, lineWidth, playerSize, powerupSize, screenSizeX, screenSizeY)
 import Model.Player
 import Model.PowerUp
 import Model.Movement
@@ -15,7 +15,6 @@ import Graphics.Gloss
 
 window :: Display
 window = InWindow "Shoot 'Em Up" (2 * float2Int screenSizeX, 2 * float2Int screenSizeY) (0, 0)
-
 
 -- Defines a Picture for each object
 class Renderable a where
@@ -30,7 +29,7 @@ instance Renderable PowerUp where
     toPicture (SpeedBoost _) = color azure (thickCircle powerupSize lineWidth)
 
 instance Renderable Bullet where
-    toPicture _ = color white (rectangleSolid bulletSizeX bulletSizeY)
+    toPicture _ = color white (rectangleSolid bulletSize bulletSize)
 
 instance Renderable BasicEnemy where
     toPicture _ = color red (circleSolid enemySize)
@@ -46,7 +45,6 @@ instance Renderable BasicPlayerSeekingEnemy where
 
 instance Renderable FastPlayerSeekingEnemy where
     toPicture _ = color violet (circleSolid enemySize)
-
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture
