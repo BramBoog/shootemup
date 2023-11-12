@@ -14,18 +14,18 @@ playerX :: Float
 playerX = screenMinX + 50
 
 basicEnemyHorizontalSpeed, basicEnemyVerticalSpeed, fastEnemyHorizontalSpeed, fastEnemyVerticalSpeed :: Float
-basicEnemyHorizontalSpeed = 2
-basicEnemyVerticalSpeed = 1
-fastEnemyHorizontalSpeed = 3
-fastEnemyVerticalSpeed = 1.5
+basicEnemyHorizontalSpeed = 8
+basicEnemyVerticalSpeed = 5
+fastEnemyHorizontalSpeed = 13
+fastEnemyVerticalSpeed = 8
 
 playerNormalVerticalSpeed, playerBoostedVerticalSpeed :: Float
-playerNormalVerticalSpeed = 2
-playerBoostedVerticalSpeed = 3
+playerNormalVerticalSpeed = 10
+playerBoostedVerticalSpeed = 20
 
 bulletHorizontalSpeed, bulletVerticalSpeed :: Float
-bulletHorizontalSpeed = 4
-bulletVerticalSpeed = 2
+bulletHorizontalSpeed = 15
+bulletVerticalSpeed = 7.5
 
 -- The space between the shooting object and the bullet, and the space between each bullet in a burst fire.
 standardBulletDisplacement, burstBulletDisplacement :: Float
@@ -43,11 +43,11 @@ bulletSize = 7
 -- time
 
 enemyShootingCooldown, playerShootingCooldown :: Float
-enemyShootingCooldown = 4
-playerShootingCooldown = 3
+enemyShootingCooldown = 5
+playerShootingCooldown = 2
 
 powerUpDuration :: Float
-powerUpDuration = 2
+powerUpDuration = 10
 
 -- Spawning probabilities
 
@@ -55,10 +55,10 @@ timeToHardestGameState :: Double
 timeToHardestGameState = 600 -- 10 minutes
 
 spawnPowerUpOnStepProbability :: Double
-spawnPowerUpOnStepProbability = 0.01
+spawnPowerUpOnStepProbability = 0.007
 
 spawnEnemyOnStepProbability :: Double
-spawnEnemyOnStepProbability = 0.05
+spawnEnemyOnStepProbability = 0.02
 
 basicEnemyModifier, burstEnemyModifier, coneEnemyModifier, basicSeekingEnemyModifier, fastSeekingEnemyModifier :: Double
 basicEnemyModifier = 1.8
@@ -71,8 +71,8 @@ fastSeekingEnemyModifier = 1
 -- Animation
 
 animationLength :: Float
-animationLength = 4
+animationLength = 3
 particleSize :: Float
-particleSize = 20
+particleSize = 10
 animationSize :: Float
-animationSize = 50
+animationSize = 30
