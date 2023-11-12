@@ -5,12 +5,8 @@ import Model.GameState
 import Model.Parameters
 import Model.Movement
 import View.Window
-import View.Window
 import qualified Data.Map as Map
 import Graphics.Gloss
-import Model.Player
-import View.Animations
-import Data.List ((\\))
 import Model.Player
 import View.Animations
 import Data.List ((\\))
@@ -19,7 +15,6 @@ import Data.List ((\\))
 render :: Show gameObject => Map.Map String Picture -> gameObject -> Picture
 render assetNameToPicture gameObject = Map.findWithDefault defaultCircle (show gameObject) assetNameToPicture
 -- If the key is not present in the dictionary, show a default circle.
-    where
     where
         defaultCircle = circle defaultCircleSize
         defaultCircleSize = 30
@@ -42,11 +37,9 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture
 translatePicture picture gameObject = translate x y picture
     where
-    where
         (x, y) = pos gameObject
 
 
--- Given a gameObject, return the right picture on the correct place.
 -- Given a gameObject, return the right picture on the correct place.
 givePicture :: (HasPosition gameObject, Show gameObject) => gameObject -> Picture
 givePicture gameObject = translatePicture renderedGameObject gameObject
@@ -161,9 +154,6 @@ relativePos aPos@(x, y) relativeFactor direction = case direction of
 
 -- Return all the pictures of the entire gamestate.
 viewPure :: GameState -> Picture
-viewPure gs@GameState{ player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} =
-    Pictures (renderAnimations gs : pictureLivesAndScore gs : playerPicture : basicEnemyListPicture ++ burstEnemyListPicture ++ coneEnemyListPicture ++ basicPlayerSeekingEnemyListPicture ++ fastPlayerSeekingEnemyListPicture ++ bulletsPicture ++ powerUpsPicture)
-        where
 viewPure gs@GameState{ player, enemies = (basicEnemyList, burstEnemyList, coneEnemyList, basicPlayerSeekingEnemyList,fastPlayerSeekingEnemyList), bullets, powerUps} =
     Pictures (renderAnimations gs : pictureLivesAndScore gs : playerPicture : basicEnemyListPicture ++ burstEnemyListPicture ++ coneEnemyListPicture ++ basicPlayerSeekingEnemyListPicture ++ fastPlayerSeekingEnemyListPicture ++ bulletsPicture ++ powerUpsPicture)
         where

@@ -24,8 +24,6 @@ data Player = Player {
 
 data PlayerSpeed = Normal | Boosted
 
-data PlayerSpeed = Normal | Boosted
-
 instance Show Player where
   show player = "Player"
 
@@ -40,16 +38,6 @@ instance CanShoot Player where
   weapon = playerWeapon
 
 -- player only moves in y, cannot move beyond max and min y
-movePlayer :: Direction -> Player -> Player
-movePlayer d pl@Player{playerPos, speed} = let dy = case speed of
-                                                      Normal -> playerNormalVerticalSpeed
-                                                      Boosted -> playerBoostedVerticalSpeed
-                                               sign = case d of
-                                                        ToTop -> 1
-                                                        ToBottom -> -1
-                                                        _ -> error "Player can only move up or down."
-                                               (x, y) = move playerPos (0, sign * dy)
-                                            in pl{playerPos = (x, min (max y screenMinY) screenMaxY)}
 movePlayer :: Direction -> Player -> Player
 movePlayer d pl@Player{playerPos, speed} = let dy = case speed of
                                                       Normal -> playerNormalVerticalSpeed
