@@ -212,16 +212,6 @@ spawnNewPowerUp gs = do p <- generateProbability
                         if p <= spawnPowerUpOnStepProbability then spawnInGameState spawnPowerUp gs
                         else return gs
 
--- Take the animations from the queue and play the right type of animation at the right position.
-handleAnimationQueue :: GameStateTransformIO
-handleAnimationQueue gs@GameState{animations = []} = return gs -- Do nothing is there are no animations to be played.
-handleAnimationQueue gs@GameState{animations = (a1:as)} =
-    -- Otherwise, playe the next animation and the rest recursively.
-    do animate window black (playAnimation PowerUpAnimation(animationPos a1))
-       handleAnimationQueue gs {animations = as}
-       return gs
-
-
 -- Combine all GameStateTransforms that occur on a time step into one, if the game is in Playing phase.
 updateOnStep :: Float -> GameStateTransformIO
 updateOnStep t gs@GameState{phase} = case phase of
