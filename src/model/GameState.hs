@@ -89,7 +89,12 @@ despawnOutOfBounds gs@GameState{
       $ despawn coneOutOfBounds
       $ despawn basicSeekingOutOfBounds
       $ despawn fastSeekingOutOfBounds
-      $ despawn bulletsOutOfBounds gs
+      $ despawn allBulletsHit
+      $ addScore killedEnemies gs
+
+-- Add 10 points to the score per killed enemy.
+addScore :: Int -> GameStateTransform
+addScore killedEnemies gs@GameState{score} = gs {score = score + killedEnemies * 10}
 
 -- Determines which enemies have been hit by bullets and despawns both them and the corresponding bullets.
 killEnemies :: GameStateTransform
