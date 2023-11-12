@@ -2,7 +2,7 @@
 module View.View where
 
 import Model.GameState
-import Model.Parameters (screenMaxX, screenMaxY)
+import Model.Parameters(bulletSize, enemySize, lineWidth, playerSize, powerupSize, screenMaxX, screenMaxY)
 import Model.Movement
 import GHC.Float (float2Int)
 import qualified Data.Map as Map
@@ -20,14 +20,6 @@ render assetNameToPicture gameObject = Map.findWithDefault defaultCircle (show g
         defaultCircle = circle defaultCircleSize
         defaultCircleSize = 30
 
-
-enemySize = 20
-playerSize = 50
-powerupSize = 20
-lineWidth = 6
-bulletSizeX = 7
-bulletSizeY = 3
-
 -- Given a string refering to a data type, this function returns a corresponding picture for that data type.
 asssetNameToPicture :: Map.Map String Picture
 asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemySize)),
@@ -39,9 +31,8 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
                                     ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
                                     ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
                                     ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
-                                    ("Bullet", color white (rectangleSolid bulletSizeX bulletSizeY))
+                                    ("Bullet", color white (rectangleSolid bulletSize bulletSize))
                                    ]
-
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture

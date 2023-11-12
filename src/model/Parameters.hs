@@ -36,3 +36,12 @@ randomY = 0.5
 enemyShootingCooldown, playerShootingCooldown :: Float
 enemyShootingCooldown = 4
 playerShootingCooldown = 3
+
+
+-- Sizes of rendered objects
+enemySize, playerSize, powerupSize, lineWidth, bulletSize:: Float
+enemySize = 20
+playerSize = 50
+powerupSize = 20
+lineWidth = 6
+bulletSize = 7

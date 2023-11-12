@@ -5,7 +5,9 @@ module Model.Movement (
   HasPosition (pos, hit, outOfBounds),
 ) where
 
-import Model.Parameters (screenMinX, screenMaxX, screenMinY, screenMaxY)
+import Model.Parameters (screenMinX, screenMaxX, screenMinY, screenMaxY, enemySize, playerSize, powerupSize, bulletSize)
+import qualified Data.Map as Map
+
 
 type Position = (Float, Float)
 type Vector   = (Float, Float) -- x and y component
@@ -14,33 +16,46 @@ data Square = Square {bottomLeft :: Position, width :: Float} -- A square is def
 move :: Position -> Vector -> Position
 move (x, y) (dx, dy) = (x + dx, y + dy)
 
-class HasPosition a where
+class Show a => HasPosition a where
   pos :: a -> Position
 
   -- Given an object that has a position and a hitBoxSize, return its hitbox
-  hitbox :: a  -> Square
+  hitbox ::  a -> Square
   hitbox a = Square {bottomLeft = squarePos, width = hitboxSize}
-    where 
-      hitboxSize = 10
+    where
+      hitboxSize = Map.findWithDefault defaultSize (show a) assetNameToSize
+      defaultSize = enemySize
       (x, y) = pos a
-      squarePos = (x - (hitboxSize/2), y - (hitboxSize/2))
+      squarePos = (x - (hitboxSize / 2), y - (hitboxSize / 2))
+      -- Based on the asset name of an object, return the size of that object.
+      assetNameToSize = Map.fromList [("BasicEnemy", enemySize),
+                                      ("BurstEnemy", enemySize),
+                                      ("ConeEnemy", enemySize),
+                                      ("BasicPlayerSeekingEnemy", enemySize),
+                                      ("FastPlayerSeekingEnemy", enemySize),
+                                      ("Player", playerSize),
+                                      ("BurstFire", powerupSize),
+                                      ("ConeFire", powerupSize),
+                                      ("SpeedBoost", powerupSize),
+                                      ("Bullet", bulletSize)
+                                      ]
 
   -- The object is out of bounds when all corners are outside the screen.
   outOfBounds :: a -> Bool
   outOfBounds a = all (< screenMinX) xCoordinates || all (> screenMaxX) xCoordinates || all (< screenMinY) yCoordinates || all (> screenMaxY) yCoordinates
                     where cornersObject = corners (hitbox a)
                           (xCoordinates, yCoordinates) = unzip cornersObject
-  
+
   -- Given two objects, return these arguments if they've hit each other. 
   hit :: HasPosition b => a -> b -> Maybe (a, b)
   hit a b | hitboxesIntersect a b = Just (a, b)
           | otherwise = Nothing
-    
+
   -- Given two objects with a position, return if their hitboxes intersect or not.
   hitboxesIntersect ::  HasPosition b => a -> b -> Bool
   hitboxesIntersect a b = any (`pointInHitbox` h1) (corners h2) || any (`pointInHitbox` h2) (corners h1)
       where
-        (h1, h2) = (hitbox a, hitbox b) 
+        (h1, h2) = (hitbox a, hitbox b)
 
 -- Return a list with all the corners of a square.  
 corners :: Square -> [Position]
