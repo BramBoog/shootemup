@@ -1,5 +1,16 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Model.GameState where
+{-# LANGUAGE DeriveGeneric #-}
+module Model.GameState(
+  GameState (GameState, phase, player, enemies, bullets, score, powerUps, elapsedTime, animations),
+  encodeFile,
+  decodeFileStrict,
+  GameStateTransform,
+  GameStateTransformIO,
+  Score,
+  GamePhase (Playing, Paused, GameOver),
+  initialState,
+  updateOnStep
+) where
 
 import Model.Movement (outOfBounds, Position, HasPosition (pos))
 import Model.Player
@@ -10,9 +21,12 @@ import Model.Parameters
 import Model.Randomness
 import View.Window
 import View.Animations
+
 import Graphics.Gloss
 import Data.List ((\\))
 import GHC.Float (float2Double)
+import Data.Aeson
+import GHC.Generics
 
 data GameState = GameState {
   phase :: GamePhase,
@@ -29,9 +43,19 @@ data GameState = GameState {
   powerUps :: [PowerUp],
   animations :: [Animation],
   elapsedTime :: Float
-}
+} deriving (Generic, Show)
 
-data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
+instance ToJSON GameState where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON GameState where
+
+data GamePhase = Playing | Paused | GameOver deriving (Eq, Show, Generic)
+
+instance ToJSON GamePhase where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON GamePhase where
+
+
 type Score = Int
 type GameStateTransform   = GameState -> GameState
 type GameStateTransformIO = GameState -> IO GameState

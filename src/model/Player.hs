@@ -1,8 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model.Player where
 
-import Model.Movement (Position, Vector, HasPosition (pos, hit), move, Direction (ToTop, ToBottom))
-import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown, powerUpDuration, playerNormalVerticalSpeed, playerBoostedVerticalSpeed)
+import Model.Movement (Position, Vector, HasPosition (pos, hitboxSize, hit), move, Direction (ToTop, ToBottom))
+import Model.Parameters (screenMinY, screenMaxY, playerShootingCooldown, playerSize, powerUpDuration, playerNormalVerticalSpeed, playerBoostedVerticalSpeed)
 import Model.Shooting (
     Bullet,
     Weapon (Single, Burst, Cone),
@@ -11,6 +13,9 @@ import Model.Shooting (
 import Model.PowerUp
 
 import Data.Maybe (mapMaybe)
+import Data.Aeson
+import GHC.Generics
+
 
 data Player = Player {
   playerPos :: Position,
@@ -20,15 +25,13 @@ data Player = Player {
   playerCooldown :: Float,
   weaponPowerUpTimer :: Maybe Float,
   speedBoostPowerUpTimer :: Maybe Float
-}
+} deriving (Generic, Show)
 
-data PlayerSpeed = Normal | Boosted
-
-instance Show Player where
-  show player = "Player"
+data PlayerSpeed = Normal | Boosted deriving (Generic, Show)
 
 instance HasPosition Player where
   pos = playerPos
+  hitboxSize _ = playerSize
 
 instance CanShoot Player where
   shootsRightward _ = True
@@ -36,6 +39,14 @@ instance CanShoot Player where
   lowerCooldown t p@Player{playerCooldown} = p{playerCooldown = playerCooldown - t}
   resetCooldown p@Player{playerCooldown} = p{playerCooldown = playerShootingCooldown}
   weapon = playerWeapon
+
+instance ToJSON Player where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON Player where
+
+instance ToJSON PlayerSpeed where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON PlayerSpeed where
 
 -- player only moves in y, cannot move beyond max and min y
 movePlayer :: Direction -> Player -> Player

@@ -1,18 +1,25 @@
 module Main where
 
 import Controller.Controller
+import Controller.FileSystem
 import View.View
 import View.Window
-import Model.GameState (initialState)
+import Model.GameState (initialState, updateOnStep)
 
 import Graphics.Gloss.Interface.IO.Game
-import Graphics.Gloss.Interface.IO.Animate (animateIO)
+import System.Environment
 
 main :: IO ()
-main = playIO window
-              black
-              10
-              initialState
-              view
-              input
-              step
+main = do args <- getArgs
+          initState <- case args of
+            [] -> return initialState
+            "LoadGame":_ -> loadGameState
+            _ -> error "Unrecognised command line argument"
+
+          playIO window
+                      black
+                      10
+                      initState
+                      view
+                      keyboardInputHandler
+                      updateOnStep

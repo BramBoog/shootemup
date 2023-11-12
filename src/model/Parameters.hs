@@ -29,7 +29,7 @@ bulletVerticalSpeed = 2
 
 -- The space between the shooting object and the bullet, and the space between each bullet in a burst fire.
 standardBulletDisplacement, burstBulletDisplacement :: Float
-standardBulletDisplacement = 0.02
+standardBulletDisplacement = 25
 burstBulletDisplacement = 20
 
 -- Size of rendered objects

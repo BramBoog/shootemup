@@ -1,23 +1,29 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 module Model.PowerUp where
 
-import Model.Movement (Position, HasPosition (pos))
+import Model.Movement (Position, HasPosition (pos, hitboxSize))
 import Model.Randomness
 import Model.Parameters
-  
+
+import Data.Aeson
+import GHC.Generics
+
 data PowerUp = BurstFire {burstFirePos :: Position}
               | ConeFire {coneFirePos :: Position}
-              | SpeedBoost {speedBoostPos :: Position} deriving Eq
+              | SpeedBoost {speedBoostPos :: Position} deriving (Generic, Eq, Show)
             
-instance Show PowerUp where
-  show BurstFire {burstFirePos} = "BurstFire"
-  show ConeFire {coneFirePos} = "BurstFire"
-  show SpeedBoost {speedBoostPos} = "SpeedBoost"
-
 instance HasPosition PowerUp where
   pos BurstFire {burstFirePos} = burstFirePos
   pos ConeFire {coneFirePos} = coneFirePos
   pos SpeedBoost {speedBoostPos} = speedBoostPos
+
+  hitboxSize _ = powerupSize
+
+instance ToJSON PowerUp where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON PowerUp where
 
 -- Randomly chooses a powerup type and creates a new powerup of that type at a random y and the player's x coordinates
 spawnPowerUp :: IO PowerUp

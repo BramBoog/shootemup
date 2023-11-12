@@ -2,7 +2,7 @@ module Model.Movement (
   Position,
   Vector,
   move,
-  HasPosition (pos, hit, outOfBounds),
+  HasPosition (pos, hitboxSize, hit, outOfBounds),
   Direction (ToTop, ToBottom, ToRight, ToLeft)
 ) where
 
@@ -17,29 +17,18 @@ data Square = Square {bottomLeft :: Position, width :: Float} -- A square is def
 move :: Position -> Vector -> Position
 move (x, y) (dx, dy) = (x + dx, y + dy)
 
-class Show a => HasPosition a where
+class HasPosition a where
   pos :: a -> Position
 
   -- Given an object that has a position and a hitBoxSize, return its hitbox
-  hitbox ::  a -> Square
-  hitbox a = Square {bottomLeft = squarePos, width = hitboxSize}
+  hitbox :: a -> Square
+  hitbox a = Square {bottomLeft = squarePos, width = size}
     where
-      hitboxSize = Map.findWithDefault defaultSize (show a) assetNameToSize
-      defaultSize = enemySize
       (x, y) = pos a
-      squarePos = (x - (hitboxSize / 2), y - (hitboxSize / 2))
-      -- Based on the asset name of an object, return the size of that object.
-      assetNameToSize = Map.fromList [("BasicEnemy", enemySize),
-                                      ("BurstEnemy", enemySize),
-                                      ("ConeEnemy", enemySize),
-                                      ("BasicPlayerSeekingEnemy", enemySize),
-                                      ("FastPlayerSeekingEnemy", enemySize),
-                                      ("Player", playerSize),
-                                      ("BurstFire", powerupSize),
-                                      ("ConeFire", powerupSize),
-                                      ("SpeedBoost", powerupSize),
-                                      ("Bullet", bulletSize)
-                                      ]
+      size = hitboxSize a
+      squarePos = (x - (size / 2), y - (size / 2))
+                                    
+  hitboxSize :: a -> Float
 
   -- The object is out of bounds when all corners are outside the screen.
   outOfBounds :: a -> Bool
