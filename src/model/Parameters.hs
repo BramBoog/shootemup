@@ -2,11 +2,16 @@ module Model.Parameters where
 
 -- movement and position
 
-screenMinX, screenMaxX, screenMinY, screenMaxY :: Float
-screenMinX = -400
-screenMaxX = 400
-screenMinY = -250
-screenMaxY = 250
+screenSizeX, screenSizeY, screenMinX, screenMaxX, screenMinY, screenMaxY :: Float
+screenSizeX = 800
+screenMinX = -screenSizeX
+screenMaxX = screenSizeX
+screenSizeY = 450
+screenMinY = -screenSizeY
+screenMaxY = screenSizeY
+
+playerX :: Float
+playerX = screenMinX + 50
 
 basicEnemyHorizontalSpeed, basicEnemyVerticalSpeed, fastEnemyHorizontalSpeed, fastEnemyVerticalSpeed :: Float
 basicEnemyHorizontalSpeed = 2
@@ -27,9 +32,13 @@ standardBulletDisplacement, burstBulletDisplacement :: Float
 standardBulletDisplacement = 0.02
 burstBulletDisplacement = 20
 
--- change later to generate randomly
-randomY :: Float
-randomY = 0.5
+-- Size of rendered objects
+enemySize, playerSize, powerupSize, lineWidth, bulletSize :: Float
+enemySize = 20
+playerSize = 50
+powerupSize = 20
+lineWidth = 6
+bulletSize = 7
 
 -- time
 
@@ -38,10 +47,20 @@ enemyShootingCooldown = 4
 playerShootingCooldown = 3
 
 
--- Sizes of rendered objects
-enemySize, playerSize, powerupSize, lineWidth, bulletSize:: Float
-enemySize = 20
-playerSize = 50
-powerupSize = 20
-lineWidth = 6
-bulletSize = 7
+-- Spawning probabilities
+
+timeToHardestGameState :: Double
+timeToHardestGameState = 600 -- 10 minutes
+
+spawnPowerUpOnStepProbability :: Double
+spawnPowerUpOnStepProbability = 0.01
+
+spawnEnemyOnStepProbability :: Double
+spawnEnemyOnStepProbability = 0.05
+
+basicEnemyModifier, burstEnemyModifier, coneEnemyModifier, basicSeekingEnemyModifier, fastSeekingEnemyModifier :: Double
+basicEnemyModifier = 1.8
+burstEnemyModifier = 1.6
+coneEnemyModifier = 1.4
+basicSeekingEnemyModifier = 1.2
+fastSeekingEnemyModifier = 1
