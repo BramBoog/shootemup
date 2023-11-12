@@ -252,30 +252,30 @@ class Despawnable a where
 -- Use list difference operator \\ to remove elements to despawn from each list
 instance Despawnable BasicEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                  in gs {enemies = (basics \\ es, bursts, cones, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
+                  in gs {enemies = (basics \\ es, bursts, cones, basicseekings, fastseekings), animations = despawnAnimations gs es ++ animations gs}
 
 instance Despawnable BurstEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                  in gs {enemies = (basics, bursts \\ es, cones, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
+                  in gs {enemies = (basics, bursts \\ es, cones, basicseekings, fastseekings), animations = despawnAnimations gs es ++ animations gs}
 
 instance Despawnable ConeEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                  in gs {enemies = (basics, bursts, cones \\ es, basicseekings, fastseekings), animations = despawnAnimations es ++ animations gs}
+                  in gs {enemies = (basics, bursts, cones \\ es, basicseekings, fastseekings), animations = despawnAnimations gs es ++ animations gs}
 
 instance Despawnable BasicPlayerSeekingEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                  in gs {enemies = (basics, bursts, cones, basicseekings \\ es, fastseekings), animations = despawnAnimations es ++ animations gs}
+                  in gs {enemies = (basics, bursts, cones, basicseekings \\ es, fastseekings), animations = despawnAnimations gs es ++ animations gs}
 
 instance Despawnable FastPlayerSeekingEnemy where
   despawn es gs = let (basics, bursts, cones, basicseekings, fastseekings) = enemies gs
-                  in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es), animations = despawnAnimations es ++ animations gs}
+                  in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es), animations = despawnAnimations gs es ++ animations gs}
 
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
 
 --Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
-despawnAnimations :: (Despawnable a, HasPosition a) => [a] -> [Animation]
-despawnAnimations es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e}) es
+despawnAnimations :: (Despawnable a, HasPosition a) => GameState -> [a] -> [Animation]
+despawnAnimations gs es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e, animationStart = elapsedTime gs}) es
 
 -- For all objects which can be spawned into the GameState with a random component.
 class Spawnable a where
