@@ -30,9 +30,8 @@ asssetNameToPicture = Map.fromList [("BasicEnemy", color red (circleSolid enemyS
                                     ("BurstFire", color chartreuse (thickCircle powerupSize lineWidth)),
                                     ("ConeFire", color yellow (thickCircle powerupSize lineWidth)),
                                     ("SpeedBoost", color azure (thickCircle powerupSize lineWidth)),
-                                    ("Bullet", color white (rectangleSolid bulletSizeX bulletSizeY))
+                                    ("Bullet", color white (rectangleSolid bulletSize bulletSize))
                                    ]
-
 
 -- Given a picture and a gameObject, move the picture by the position of that gameObject.
 translatePicture :: HasPosition gameObject => Picture -> gameObject -> Picture
@@ -51,8 +50,8 @@ givePicture gameObject = translatePicture renderedGameObject gameObject
 pictureLivesAndScore :: GameState -> Picture
 pictureLivesAndScore gs@GameState{player = player, score = score} = Pictures [scorePicture, livesPicture]
     where
-        scorePicture = scale textSize textSize $ translate (3.2 * screenMinX) (3 * screenSizeY) $ color white (Text ("Score:" ++ show score))-- Place the score in the left corner.
-        livesPicture = scale textSize textSize $ translate (2.5 * screenMinX) (3 * screenSizeY) $ color white (Text ("Lives:" ++ show (lives player))) -- The lives are to the right of the score.
+        scorePicture = scale textSize textSize $ translate (3.2 * screenMinX) (3 * screenMaxY) $ color white (Text ("Score:" ++ show score))-- Place the score in the left corner.
+        livesPicture = scale textSize textSize $ translate (2.5 * screenMinX) (3 * screenMaxY) $ color white (Text ("Lives:" ++ show (lives player))) -- The lives are to the right of the score.
         textSize = 0.3
 
 
