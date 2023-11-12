@@ -107,6 +107,7 @@ killEnemies gs@GameState{
                                                  ++ bulletsHitCone
                                                  ++ bulletsHitBasicSeeking
                                                  ++ bulletsHitFastSeeking
+        killedEnemies                             = length allBulletsHit                             
      in despawn basicHit
       $ despawn burstHit
       $ despawn coneHit
