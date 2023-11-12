@@ -1,5 +1,7 @@
 # Shoot 'em Up: how to run
 
+NOTE: the game has been built for GHC 8.6.5.
+
 ## Starting the game
 
 The game can be started from the project directory using the command line.
