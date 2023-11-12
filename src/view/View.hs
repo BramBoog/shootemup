@@ -78,7 +78,7 @@ removeAnimations gs@GameState{animations} = gs {animations = animations \\ remov
         removedAnimations = filter isAnimationOver animations
         currentTime = elapsedTime gs
         startingTime a = animationStart a
-        isAnimationOver a = currentTime - startingTime a < animationLength
+        isAnimationOver a = (currentTime - startingTime a) > animationLength
 
 
 -- This function takes an animation and renders a particle there, where the position is based on the difference between elaspedTime and animationStart.
