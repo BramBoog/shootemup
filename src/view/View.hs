@@ -62,8 +62,8 @@ givePicture gameObject = translatePicture renderedGameObject gameObject
 pictureLivesAndScore :: GameState -> Picture
 pictureLivesAndScore gs@GameState{player = player, score = score} = Pictures [scorePicture, livesPicture]
     where
-        scorePicture = scale textSize textSize $ translate (3.2 * screenMinX) (3 * screenMaxY) $ color white (Text ("Score:" ++ show score))-- Place the score in the left corner.
-        livesPicture = scale textSize textSize $ translate (2.5 * screenMinX) (3 * screenMaxY) $ color white (Text ("Lives:" ++ show (lives player))) -- The lives are to the right of the score.
+        scorePicture = scale textSize textSize $ translate (3.2 * screenMinX) (3 * screenSizeY) $ color white (Text ("Score:" ++ show score))-- Place the score in the left corner.
+        livesPicture = scale textSize textSize $ translate (2.5 * screenMinX) (3 * screenSizeY) $ color white (Text ("Lives:" ++ show (lives player))) -- The lives are to the right of the score.
         textSize = 0.3
 
 
@@ -80,6 +80,16 @@ renderAnimations gs@GameState{animations} = Pictures $ map renderOneAnimation an
                 difference = currentTime - startingTime
                 -- This factor shows how far in the animation we are.
                 relativeFactor = animationSize * difference / animationLength
+
+                
+-- Remove an animation from the queue if its over.
+removeAnimations :: GameStateTransform
+removeAnimations gs@GameState{animations} = gs {animations = animations \\ removedAnimations}
+    where
+        removedAnimations = filter isAnimationOver animations
+        currentTime = elapsedTime gs
+        startingTime a = animationStart a
+        isAnimationOver a = (currentTime - startingTime a) > animationLength
 
 
 -- This function takes an animation and renders a particle there, where the position is based on the difference between elaspedTime and animationStart.
@@ -104,7 +114,6 @@ relativePos aPos@(x, y) relativeFactor direction = case direction of
     ToBottom -> (x, y - relativeFactor)
     ToRight -> (x + relativeFactor, y)
     ToLeft -> (x - relativeFactor, y)
-
 
 -- Return all the pictures of the entire gamestate.
 viewPure :: GameState -> Picture
