@@ -111,8 +111,8 @@ killEnemies gs@GameState{
         $ despawn coneHit
         $ despawn basicSeekingHit
         $ despawn fastSeekingHit
-        $ despawn allBulletsHit gs
-        $ addScore killedEnemies
+        $ despawn allBulletsHit
+        $ addScore killedEnemies gs
 
 -- Add 10 points to the score per killed enemy.
 addScore :: Int -> GameStateTransform
