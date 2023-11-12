@@ -5,9 +5,13 @@
 The game can be started from the project directory using the command line.
 
 The follwing command starts the game from a predefined initial state:
+
 ```cabal run shootemup```
+
 If you wish to start from a previously created save file (more below), add `"LoadGame"` as a command line argument:
+
 ```cabal run shootemup "LoadGame"```
+
 
 The game will open in a new screen and be ready to play!
 
