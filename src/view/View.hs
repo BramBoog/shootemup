@@ -81,17 +81,6 @@ renderAnimations gs@GameState{animations} = Pictures $ map renderOneAnimation an
                 -- This factor shows how far in the animation we are.
                 relativeFactor = animationSize * difference / animationLength
 
-                
--- Remove an animation from the queue if its over.
-removeAnimations :: GameStateTransform
-removeAnimations gs@GameState{animations} = gs {animations = animations \\ removedAnimations}
-    where
-        removedAnimations = filter isAnimationOver animations
-        currentTime = elapsedTime gs
-        startingTime a = animationStart a
-        isAnimationOver a = (currentTime - startingTime a) > animationLength
-
-
 -- This function takes an animation and renders a particle there, where the position is based on the difference between elaspedTime and animationStart.
 renderParticles :: Animation -> Float -> Float -> Picture
 renderParticles animation relativeFactor difference = Pictures [topParticle, bottomParticle, leftParticle, rightParticle]
