@@ -79,7 +79,7 @@ renderAnimations gs@GameState{animations} = Pictures $ map renderOneAnimation an
                 currentTime = elapsedTime gs
                 difference = currentTime - startingTime
                 -- This factor shows how far in the animation we are.
-                relativeFactor = animationSize * currentTime / animationLength
+                relativeFactor = animationSize * difference / animationLength
 
 
 -- This function takes an animation and renders a particle there, where the position is based on the difference between elaspedTime and animationStart.
