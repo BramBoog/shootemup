@@ -7,7 +7,7 @@ import Model.Parameters
   
 data PowerUp = BurstFire {burstFirePos :: Position}
               | ConeFire {coneFirePos :: Position}
-              | SpeedBoost {speedBoostPos :: Position}
+              | SpeedBoost {speedBoostPos :: Position} deriving Eq
             
 instance Show PowerUp where
   show BurstFire {burstFirePos} = "BurstFire"

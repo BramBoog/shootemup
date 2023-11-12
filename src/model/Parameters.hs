@@ -20,8 +20,8 @@ fastEnemyHorizontalSpeed = 3
 fastEnemyVerticalSpeed = 1.5
 
 playerNormalVerticalSpeed, playerBoostedVerticalSpeed :: Float
-playerNormalVerticalSpeed = 1
-playerBoostedVerticalSpeed = 1.5
+playerNormalVerticalSpeed = 2
+playerBoostedVerticalSpeed = 3
 
 bulletHorizontalSpeed, bulletVerticalSpeed :: Float
 bulletHorizontalSpeed = 4
@@ -32,19 +32,22 @@ standardBulletDisplacement, burstBulletDisplacement :: Float
 standardBulletDisplacement = 0.02
 burstBulletDisplacement = 20
 
-enemySize, playerSize, powerupSize, lineWidth, bulletSizeX, bulletSizeY :: Float
+-- Size of rendered objects
+enemySize, playerSize, powerupSize, lineWidth, bulletSize :: Float
 enemySize = 20
 playerSize = 50
 powerupSize = 20
 lineWidth = 6
-bulletSizeX = 7
-bulletSizeY = 3
+bulletSize = 7
 
 -- time
+
 enemyShootingCooldown, playerShootingCooldown :: Float
 enemyShootingCooldown = 4
 playerShootingCooldown = 3
 
+powerUpDuration :: Float
+powerUpDuration = 2
 
 -- Spawning probabilities
 
