@@ -66,3 +66,13 @@ burstEnemyModifier = 1.6
 coneEnemyModifier = 1.4
 basicSeekingEnemyModifier = 1.2
 fastSeekingEnemyModifier = 1
+
+
+-- Animation
+
+animationLength :: Float
+animationLength = 4
+particleSize :: Float
+particleSize = 20
+animationSize :: Float
+animationSize = 50

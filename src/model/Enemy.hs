@@ -18,7 +18,7 @@ data BasicEnemy = BasicEnemy {basicEnemyPos :: Position, basicEnemyCooldown :: F
 data BurstEnemy = BurstEnemy {burstEnemyPos :: Position, burstEnemyCooldown :: Float} deriving Eq
 data ConeEnemy = ConeEnemy {coneEnemyPos :: Position, coneEnemyCooldown :: Float} deriving Eq
 data BasicPlayerSeekingEnemy = BasicPlayerSeekingEnemy {basicSeekingPos :: Position, basicSeekingCooldown :: Float} deriving Eq
-data FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} deriving Eq
+newtype FastPlayerSeekingEnemy = FastPlayerSeekingEnemy {fastSeekingPos :: Position} deriving Eq
 
 instance HasPosition BasicEnemy where
   pos = basicEnemyPos

@@ -58,9 +58,6 @@ class Show a => HasPosition a where
       where
         (h1, h2) = (hitbox a, hitbox b)
 
--- Enumeration of all directions along the x and y axes
-data Direction = ToTop | ToBottom | ToLeft | ToRight
-
 -- Return a list with all the corners of a square.  
 corners :: Square -> [Position]
 corners (Square bottomLeft@(bottomLeftX, bottomLeftY) width) = [bottomLeft, (bottomLeftX + width, bottomLeftY), (bottomLeftX, bottomLeftY + width), (bottomLeftX+width, bottomLeftY + width)]
@@ -68,3 +65,6 @@ corners (Square bottomLeft@(bottomLeftX, bottomLeftY) width) = [bottomLeft, (bot
 -- Given a position an a hitbox, return whether the position is in that hitbox or not.
 pointInHitbox :: Position -> Square -> Bool
 pointInHitbox (x, y) (Square (bottomLeftX,bottomLeftY) width) = and [bottomLeftX <= x, x <= bottomLeftX + width, bottomLeftY <= y, y <= bottomLeftY + width]
+
+-- Enumeration of all directions along the x and y axes
+data Direction = ToTop | ToBottom | ToLeft | ToRight
