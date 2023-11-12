@@ -48,7 +48,7 @@ initialState = GameState {
   elapsedTime = 0
 }
   where 
-    initialPlayer = Player {playerPos = (playerX, 0), speed = Normal, playerWeapon = Single, lives = 10, playerCooldown = 5}
+    initialPlayer = Player {playerPos = (playerX, 0), speed = Normal, playerWeapon = Single, lives = 10, playerCooldown = 5, weaponPowerUpTimer = Nothing, speedBoostPowerUpTimer = Nothing}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (playerX, -200)}]
 
@@ -133,6 +133,9 @@ lowerCooldowns t gs@GameState{
        enemies = (basicLowered, burstLowered, coneLowered, seekingLowered, fastPlayerSeekingEnemies)
      }
 
+lowerPlayerPowerUpTimers :: Float -> GameStateTransform
+lowerPlayerPowerUpTimers t gs@GameState{player} = gs{player = lowerPowerUpTimers t player}
+
 -- Let all enemies shoot, if their cooldown allows. Add the new enemies (with reset cooldowns) and newly generated bullets to the new GameState
 enemiesShoot :: GameStateTransform
 enemiesShoot gs@GameState{
@@ -179,6 +182,13 @@ takeHitsPlayer gs@GameState{
      where
        subtractLives :: Int -> GameStateTransform
        subtractLives x gs@GameState{player} = gs{player = player {lives = lives player - x}}
+
+-- Have the player pick up all powerUps it's come into contact with, and despawn those powerUps from the GameState.
+addPowerUpsToPlayer :: GameStateTransform
+addPowerUpsToPlayer gs@GameState{player, powerUps} = let powerUpsHit = hitsOnPlayer player powerUps
+                                                         newPlayer = foldr pickUpPowerUp player powerUpsHit
+                                                      in despawn powerUpsHit gs{player = newPlayer}
+
 gameOverIfNoLives :: GameStateTransform
 gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = GameOver}
                                          else gs
@@ -215,25 +225,25 @@ spawnNewPowerUp gs = do p <- generateProbability
 -- Combine all GameStateTransforms that occur on a time step into one, if the game is in Playing phase.
 updateOnStep :: Float -> GameStateTransformIO
 updateOnStep t gs@GameState{phase} = case phase of
-                                       Playing -> update
+                                       Playing -> update t gs
                                        _ -> return gs
-  where update = let updatedTimesGS = updateTimes gs              -- first update the times in the gamestate
-                  in do spawnedNewGS <- spawnedNew updatedTimesGS -- then optionally spawn a new enemy and powerup
-                                                                  -- read these in reverse, since that's the order they're applied
-                        return $ gameOverIfNoLives                -- finally, transition to GameOver phase if player has lost all lives
-                               $ despawnOutOfBounds               -- despawn all bullets and enemies which have gone out of bounds
-                               $ takeHitsPlayer                   -- and check again if the player has been hit
-                               $ enemiesMove                      -- then move the enemies
-                               $ takeHitsPlayer                   -- having moved the bullets, check if the player has been hit
-                               $ killEnemies                      -- after moving bullets, check if that killed any enemies
-                               $ moveBullets
-                               $ enemiesShoot
-                               $ removeAnimations spawnedNewGS
-                                        
-        updateTimes = lowerCooldowns t
-                    . updateElapsedTime t
-        spawnedNew gs' = do spawnedPowerUpGS <- spawnNewPowerUp gs'
-                            spawnNewEnemy spawnedPowerUpGS
+  where update t' gs' = let updatedTimesGS = lowerPlayerPowerUpTimers t'
+                                           $ lowerCooldowns t'
+                                           $ updateElapsedTime t' gs'
+                         in do spawnedPowerUpGS <- spawnNewPowerUp updatedTimesGS
+                               spawnedEnemyGS <- spawnNewEnemy spawnedPowerUpGS
+                                                              -- read these in reverse order, since that's the order they're applied
+                               return $ gameOverIfNoLives     -- finally, transition to GameOver phase if player has lost all lives
+                                      $ despawnOutOfBounds    -- despawn all bullets and enemies which have gone out of bounds
+                                      $ takeHitsPlayer        -- and check again if the player has been hit
+                                      $ enemiesMove           -- then move the enemies
+                                      $ takeHitsPlayer        -- and if the player has been hit
+                                      $ killEnemies           -- after moving bullets, check if that killed any enemies
+                                      $ moveBullets
+                                      $ enemiesShoot 
+                                      $ addPowerUpsToPlayer
+                                      $ removeAnimations spawnedEnemyGS
+
 -- For all objects which can be despawned from the GameState.
 class Despawnable a where
   despawn :: [a] -> GameStateTransform
@@ -261,13 +271,15 @@ instance Despawnable FastPlayerSeekingEnemy where
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
 
+instance Despawnable PowerUp where
+  despawn ps gs = gs {powerUps = powerUps gs \\ ps}
+
 instance Despawnable Animation where
   despawn as gs = gs {animations = animations gs \\ as}
 
 --Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
 despawnAnimations :: (Despawnable a, HasPosition a) => GameState -> [a] -> [Animation]
 despawnAnimations gs es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e, animationStart = elapsedTime gs}) es
-
 
 -- For all objects which can be spawned into the GameState with a random component.
 class Spawnable a where
