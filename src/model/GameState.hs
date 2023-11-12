@@ -12,6 +12,7 @@ import View.Animations
 import Graphics.Gloss
 import Data.List ((\\))
 import GHC.Float (float2Double)
+
 data GameState = GameState {
   phase :: GamePhase,
   player :: Player,
@@ -28,10 +29,12 @@ data GameState = GameState {
   animations :: [Animation],
   elapsedTime :: Float
 }
+
 data GamePhase = Playing | Paused | GameOver deriving (Eq, Show)
 type Score = Int
 type GameStateTransform   = GameState -> GameState
 type GameStateTransformIO = GameState -> IO GameState
+
 initialState :: GameState
 initialState = GameState {
   phase = Playing,
@@ -47,12 +50,15 @@ initialState = GameState {
     initialPlayer = Player {playerPos = (playerX, 0), speed = Normal, playerWeapon = Single, lives = 10, playerCooldown = 5}
     initialEnemies = ([], [BurstEnemy (300, 80) 1], [ConeEnemy (300, -20) 1], [], [FastPlayerSeekingEnemy (300, -80)])
     initialPowerUps = [BurstFire {burstFirePos = (playerX, -200)}]
+
 -- Update the elapsedTime field of the GameState with the elapsed time given by the step function.
 updateElapsedTime :: Float -> GameStateTransform
 updateElapsedTime t gs = gs{elapsedTime = elapsedTime gs + t}
+
 -- Move all bullets in the GameState.
 moveBullets :: GameStateTransform
 moveBullets gs = gs{bullets = map moveBullet (bullets gs)}
+
 -- Move all enemies in the GameState.
 enemiesMove :: GameStateTransform
 enemiesMove gs@GameState{
@@ -66,6 +72,7 @@ enemiesMove gs@GameState{
       map (moveSeeking player) fastPlayerSeekingEnemies
     )}
 -- Despawn all enemies an bullets which have gone out of bounds.
+
 despawnOutOfBounds :: GameStateTransform
 despawnOutOfBounds gs@GameState{
   enemies = (basicEnemies, burstEnemies, coneEnemies, basicPlayerSeekingEnemies, fastPlayerSeekingEnemies),
@@ -83,6 +90,7 @@ despawnOutOfBounds gs@GameState{
       $ despawn fastSeekingOutOfBounds
       $ despawn bulletsOutOfBounds gs
 -- Determines which enemies have been hit by bullets and despawns both them and the corresponding bullets.
+
 killEnemies :: GameStateTransform
 killEnemies gs@GameState{
   enemies = (basicEnemies, burstEnemies, coneEnemies, basicPlayerSeekingEnemies, fastPlayerSeekingEnemies),
@@ -97,12 +105,20 @@ killEnemies gs@GameState{
                                                  ++ bulletsHitCone
                                                  ++ bulletsHitBasicSeeking
                                                  ++ bulletsHitFastSeeking
-     in despawn basicHit
-      $ despawn burstHit
-      $ despawn coneHit
-      $ despawn basicSeekingHit
-      $ despawn fastSeekingHit
-      $ despawn allBulletsHit gs
+        killedEnemies                             = length allBulletsHit
+      in despawn basicHit
+        $ despawn burstHit
+        $ despawn coneHit
+        $ despawn basicSeekingHit
+        $ despawn fastSeekingHit
+        $ despawn allBulletsHit gs
+        $ addScore killedEnemies
+
+-- Add 10 points to the score per killed enemy.
+addScore :: Int -> GameStateTransform
+addScore killedEnemies gs@GameState{score} = gs {score = score + killedEnemies * 10}
+
+
 -- Lowers the shooting cooldowns by the elapsed time for the player an all enemies types that can shoot.
 lowerCooldowns :: Float -> GameStateTransform
 lowerCooldowns t gs@GameState{
@@ -116,6 +132,7 @@ lowerCooldowns t gs@GameState{
        player = lowerCooldown t player,
        enemies = (basicLowered, burstLowered, coneLowered, seekingLowered, fastPlayerSeekingEnemies)
      }
+
 -- Let all enemies shoot, if their cooldown allows. Add the new enemies (with reset cooldowns) and newly generated bullets to the new GameState
 enemiesShoot :: GameStateTransform
 enemiesShoot gs@GameState{
@@ -161,6 +178,7 @@ takeHitsPlayer gs@GameState{
      where
        subtractLives :: Int -> GameStateTransform
        subtractLives x gs@GameState{player} = gs{player = player {lives = lives player - x}}
+
 gameOverIfNoLives :: GameStateTransform
 gameOverIfNoLives gs@GameState{player} = if lives player <= 0 then gs{phase = GameOver}
                                          else gs
@@ -187,6 +205,7 @@ spawnNewEnemy gs = do p <- generateProbability
         spawnInGameState (spawn :: IO BasicPlayerSeekingEnemy),
         spawnInGameState (spawn :: IO FastPlayerSeekingEnemy)
       ]
+
 -- Randomly determine whether to spawn a new random PowerUp.
 spawnNewPowerUp :: GameStateTransformIO
 spawnNewPowerUp gs = do p <- generateProbability
@@ -215,6 +234,7 @@ updateOnStep t gs@GameState{phase} = case phase of
                     . updateElapsedTime t
         spawnedNew gs' = do spawnedPowerUpGS <- spawnNewPowerUp gs'
                             spawnNewEnemy spawnedPowerUpGS
+
 -- For all objects which can be despawned from the GameState.
 class Despawnable a where
   despawn :: [a] -> GameStateTransform
@@ -236,9 +256,11 @@ instance Despawnable FastPlayerSeekingEnemy where
                   in gs {enemies = (basics, bursts, cones, basicseekings, fastseekings \\ es), animations = despawnAnimations gs es ++ animations gs}
 instance Despawnable Bullet where
   despawn bs gs = gs {bullets = bullets gs \\ bs}
+
 --Given a list of enemies, return a list of despawnAnimations, each with a certain position corresponding to that of each enemy.
 despawnAnimations :: (Despawnable a, HasPosition a) => GameState -> [a] -> [Animation]
 despawnAnimations gs es = map (\ e -> Animation {animationType = DespawnAnimation, animationPos = pos e, animationStart = elapsedTime gs}) es
+
 -- For all objects which can be spawned into the GameState with a random component.
 class Spawnable a where
   spawnInGameState :: IO a -> GameStateTransformIO
