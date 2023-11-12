@@ -10,6 +10,7 @@ import Model.Shooting (
     Weapon (Single, Burst, Cone),
   )
 import Model.Player
+import Model.Randomness
 import Data.Maybe
 
 -- All enemy data types. Despite seeming similar, they are separated so they can be rendered differently by the View.
@@ -36,8 +37,15 @@ instance HasPosition FastPlayerSeekingEnemy where
 
 -- All enemies are instances of this class.
 class HasPosition a => Enemy a where 
-  -- Render enemy at a random vertical position.
-  spawn :: a
+  -- Spawn an Enemy at a random y at the right side of the screen.
+  spawn :: IO a
+
+  -- Given an Enemy constructor (taking a position and a float for the cooldown),
+  -- spawn an Enemy of that type at a random y at the right side of the screen.
+  spawnEnemyType :: (Position -> Float -> a) -> IO a
+  spawnEnemyType constr = do ry <- randomY 0
+                             let p = (screenMaxX, ry)
+                             return (constr p enemyShootingCooldown)
 
   -- For a list of enemies of some type, calculate all hits with a list of bullets and separate the hit enemies and bullets out into two lists
   hitByBulletsList :: [a] -> [Bullet] -> ([a], [Bullet])
@@ -46,25 +54,25 @@ class HasPosition a => Enemy a where
 
 -- Enemy types as instances of type class Enemy
 instance Enemy BasicEnemy where
-  spawn = BasicEnemy {basicEnemyPos = (screenMaxX, randomY) , basicEnemyCooldown = enemyShootingCooldown} -- Spawn an enemy at right with a random y pos.
+  spawn = spawnEnemyType BasicEnemy
 
 instance Enemy BurstEnemy where
-  spawn = BurstEnemy {burstEnemyPos = (screenMaxX, randomY) , burstEnemyCooldown = enemyShootingCooldown}  
+  spawn = spawnEnemyType BurstEnemy
 
 instance Enemy ConeEnemy where
-  spawn = ConeEnemy {coneEnemyPos = (screenMaxX, randomY) , coneEnemyCooldown = enemyShootingCooldown}    
+  spawn = spawnEnemyType ConeEnemy 
 
 instance Enemy BasicPlayerSeekingEnemy where
-  spawn = BasicPlayerSeekingEnemy {basicSeekingPos = (screenMaxX, randomY) , basicSeekingCooldown = enemyShootingCooldown}      
+  spawn = spawnEnemyType BasicPlayerSeekingEnemy       
 
 instance Enemy FastPlayerSeekingEnemy where
-  spawn = FastPlayerSeekingEnemy {fastSeekingPos = (screenMaxX, randomY)}     
+  spawn = spawnEnemyType (\p _ -> FastPlayerSeekingEnemy p) -- ignore cooldown input as FastPlayerSeekingEnemy doesn't require one
        
 
 -- All enemies, except the player seeking types, are instances of this class.
 class Enemy a => MoveBasic a where 
   moveBasic :: a -> a 
-    
+
 instance MoveBasic BasicEnemy where
   moveBasic b = let vec = (-basicEnemyHorizontalSpeed, 0)
                     p   = pos b

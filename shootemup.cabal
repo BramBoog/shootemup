@@ -11,6 +11,7 @@ library
                     Model.Movement,
                     Model.Parameters,
                     Model.Player,
+                    Model.Randomness,
                     Model.Shooting,
                     Model.PowerUp,
                     View.View,
